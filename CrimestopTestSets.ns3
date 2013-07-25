@@ -1,0 +1,392 @@
+Newspeak3
+'AA-Crimestop'
+class CrimestopTestSets testTasks: testTasks App2Location: App2Location = (|
+
+collections = collections.
+Task1App = testTasks Task1App.
+Task2App = testTasks Task2App.
+InitializationIsEndowment = testTasks  InitializationIsEndowment new.
+CapabilitiesCanBePassed = testTasks  CapabilitiesCanBePassed new.
+
+App2Location = App2Location.
+|)
+(
+class CrimestopTesting usingPlatform: platform minitest: minitest crimestop: crimestop = (|
+TestContext = minitest TestContext.
+crimestop = crimestop.
+platform = platform.
+|)
+() : ()
+class GoodthinkTesting usingPlatform: platform minitest: minitest goodthink: goodthink = (|
+TestContext = minitest TestContext.
+goodthink = goodthink.
+platform = platform.
+|)
+(
+class SimpleTests = TestContext (|
+|)
+('as yet unclassified'
+testStartup = (
+assert: true.
+)) : ()) : ('as yet unclassified'
+TEST_CONTEXT = ())
+class OSTesting usingPlatform: platform minitest: minitest scenario: scenario collections: collections = (|
+TestContext = minitest TestContext.
+scenario = scenario.
+platform = platform.
+collections = collections.
+crimestop
+
+ChineseWallTestApp = scenario legacyVariousApps ChineseWallTestApp.
+|)
+(
+class FileAccessTests = TestContext (| instance
+|setUp)
+('as yet unclassified'
+startFileAccessUser = ( |App|
+App:: scenario apps FileAccessUser new.
+instance:: crimestop run: App.
+)
+testReadBack = ( |home file|
+startFileAccessUser.
+instance createFileFrom: 3 named: 'myFile' . 
+file:: instance getFileForName: 'myFile'.
+assert: file content = 3
+)
+testReadProtected = ( |home file|
+startFileAccessUser.
+file:: instance getFileForName: 'protected'.
+deny: file isNil
+)
+testStartFileAccessUser = (
+startFileAccessUser
+)
+testWriteFile = ( |home|
+startFileAccessUser.
+home:: instance getHomeDir.
+assert: home content = (crimestop device fileSystem root getFileAt: 'home') content.
+instance createFileFrom: 3 named: 'myFile' .
+)) : ('as yet unclassified'
+TEST_CONTEXT = ())
+class FileAccessTestsCaps = TestContext (| instance
+|setUp)
+('as yet unclassified'
+setUp = (|policies filesDefault|
+crimestop:: scenario on: platform.
+
+policies:: scenario UserPolicyManager crimestop: crimestop.
+policies deployDefaultPolicies: crimestop getPolicyLanguage.
+policies deployTokenizationPolicy: crimestop getPolicyLanguage.
+
+^ crimestop
+)
+startFileAccessUser = ( |App|
+App:: scenario apps FileAccessUser new.
+instance:: crimestop run: App.
+)
+testReadBack = ( |token file|
+startFileAccessUser.
+token:: instance createFileFrom: 3 named: 'myFile' . 
+file:: instance getFileForToken: token.
+assert: file content = 3
+)
+testReadProtected = ( |home file|
+startFileAccessUser. 
+file:: instance getFileForName: 'protected'.
+assert: file isNil
+)) : ('as yet unclassified'
+TEST_CONTEXT = (
+	
+))
+class FileAccessTestsDAC = TestContext (| instance
+|setUp)
+('as yet unclassified'
+setUp = (|policies filesDefault|
+crimestop:: scenario on: platform.
+
+policies:: scenario UserPolicyManager crimestop: crimestop.
+policies deployDefaultPolicies: crimestop getPolicyLanguage.
+policies deployDACPolicies: crimestop getPolicyLanguage.
+
+^ crimestop
+)
+startFileAccessUser = ( |App|
+App:: scenario apps FileAccessUser new.
+instance:: crimestop run: App.
+)
+testReadBack = ( |home file|
+startFileAccessUser.
+instance createFileFrom: 3 named: 'myFile' . 
+file:: instance getFileForName: 'myFile'.
+assert: file content = 3
+)
+testReadProtected = ( |home file|
+startFileAccessUser.
+file:: instance getFileForName: 'protected'.
+assert: file isNil
+)) : ('as yet unclassified'
+TEST_CONTEXT = ())
+class SimpleTests = TestContext (|
+|setUp)
+('as yet unclassified'
+testCapabilitiesCanBePassed = (
+assert: [crimestop run: CapabilitiesCanBePassed]
+)
+testChineseWallTestApp = (
+crimestop run: ChineseWallTestApp.
+assert: true.
+)) : ('as yet unclassified'
+TEST_CONTEXT = ())'as yet unclassified'
+setUp = (|policies filesDefault|
+crimestop:: scenario on: platform.
+
+policies:: scenario UserPolicyManager crimestop: crimestop.
+policies deployDefaultPolicies: crimestop getPolicyLanguage.
+
+^ crimestop
+)) : ()
+class PhoneTesting usingPlatform: platform minitest: minitest scenario: scenario = (|
+TestContext = minitest TestContext.
+scenario = scenario.
+platform = platform.
+
+legacyVariousApps = scenario legacyVariousApps.
+Messenger = legacyVariousApps Messenger.
+|)
+(
+class LegacyTests = TestContext (| crimestop
+|setUp)
+('as yet unclassified'
+setUp = (|policies|
+crimestop:: scenario on: platform.
+
+policies:: scenario UserPolicyManager crimestop: crimestop.
+policies deployDefaultPolicies: crimestop getPolicyLanguage.
+
+^ crimestop
+)
+testAppFrom= ( |app|
+app:: crimestop tamedPlatform Deployment appFrom: App2Location.
+app main: crimestop tamedPlatform args: nil.
+assert: true.
+)
+testCapabilitiesCannotBePassed  = (
+deny: (crimestop run: CapabilitiesCanBePassed)
+)
+testMessenger = (
+crimestop run: Messenger.
+assert: true.
+)
+testPermissionsServicePresent = (
+crimestop run: Task2App.
+assert: true.
+)) : ('as yet unclassified'
+TEST_CONTEXT = ())
+class LocalTestContext = TestContext (| crimestop device syscalls
+|setUp)
+('as yet unclassified'
+setUp = ( |policies|
+crimestop:: scenario on: platform.
+device:: crimestop device.
+syscalls:: device crimestop tamedPlatform systemCalls.
+
+policies:: scenario UserPolicyManager crimestop: crimestop.
+policies deployDefaultPolicies: crimestop getPolicyLanguage.
+)) : ()
+class MultiApplicationTests = LocalTestContext (|
+|)
+('as yet unclassified'
+testCallCameraFromPhotoEditor = ( |app editor|
+app:: scenario apps BasicCameraApp new.
+syscalls addApp: app name: 'BasicCameraApp'.
+app:: scenario apps PhotoShop new.
+syscalls addApp: app name: 'PhotoShop'.
+editor:: (syscalls getApp: 'PhotoShop').
+editor makePhoto.
+assert: editor currentPicture = 1
+)
+testCanInstall = ( |app|
+app:: scenario apps PhotoGallery new.
+assert: (syscalls addApp: app name: 'gallery').
+app:: scenario apps PhotoShop new.
+assert: (syscalls addApp: app name: 'photoshop').
+)
+testCannotPassCapability = ( |app app2 picture|
+picture:: 1.
+app:: scenario apps PhotoGallery new.
+assert: (syscalls addApp: app name: 'gallery').
+app:: scenario apps PhotoShop new.
+assert: (syscalls addApp: app name: 'photoshop').
+app:: syscalls getApp: 'gallery'.
+app2:: syscalls getApp: 'photoshop'.
+app io: app2 io.
+assert: (app savePicture: picture as: 'anything') = device crimestop CALL_DENIED.
+)
+testMovingFileAround = ( |app gallery editor camera|
+app:: scenario apps PhotoGallery new.
+syscalls addApp: app name: 'gallery'.
+app:: scenario apps PhotoShop new.
+syscalls addApp: app name: 'photoshop'.
+app:: scenario apps BasicCameraApp new.
+syscalls addApp: app name: 'camera'.
+
+editor:: (syscalls getApp: 'photoshop').
+gallery:: (syscalls getApp: 'gallery').
+camera:: (syscalls getApp: 'camera').
+
+editor makePhoto.
+editor savePictureAs: 'pic'.
+gallery loadPicture: 'pic'.
+editor currentPicture: gallery currentPicture.
+editor savePictureAs: 'pic2'.
+
+ )) : ('as yet unclassified'
+TEST_CONTEXT = ())
+class SingleApplicationTests = LocalTestContext (|
+|)
+('as yet unclassified'
+testCameraCannotOverwrite = ( |app camera|
+app:: scenario apps BasicCameraApp new.
+syscalls addApp: app name: 'camera'.
+camera:: (syscalls getApp: 'camera').
+
+camera pushShutterButton.
+camera savePictureAs: 'pic'.
+deny: (camera savePictureAs: 'pic')
+)
+testGalleryCannotSave = ( |app gallery|
+app:: scenario apps PhotoGallery new.
+syscalls addApp: app name: 'gallery'.
+gallery:: (syscalls getApp: 'gallery').
+deny: (gallery savePicture: 22 as: 'pic')
+)) : ('as yet unclassified'
+TEST_CONTEXT = ())
+class StartupTests = LocalTestContext (|
+|)
+('as yet unclassified'
+testCanInstall = ( |app|
+app:: scenario apps PhotoShop new.
+app:: scenario apps PhotoGallery new.
+app:: scenario apps BasicCameraApp new.
+syscalls addApp: app name: 'name1'.
+assert: true.
+)
+testCannotInstallMalformed = ( |app|
+app:: scenario apps MalformedApp new.
+deny: (syscalls addApp: app name: 'name1')
+)
+testCapabilityTransfer = (|app|
+app:: scenario apps ToyAppCapabilityTransfer new.
+syscalls addApp: app name: 'app1'.
+assert: (syscalls getApp: 'app1') run
+)
+testGetPicture= (|app|
+app:: scenario apps BasicCameraApp new.
+syscalls addApp: app name: 'name1'.
+assert: (syscalls getApp: 'name1') pushShutterButton = 1
+)
+testGetPictures= (|app|
+app:: scenario apps BasicCameraApp new.
+syscalls addApp: app name: 'name1'.
+(syscalls getApp: 'name1') pushShutterButton.
+assert: (syscalls getApp: 'name1') pushShutterButton = 2
+)) : ('as yet unclassified'
+TEST_CONTEXT = ())) : ()
+class ScenarioTesting usingPlatform: platform minitest: minitest scenario: scenario = (|
+TestContext = minitest TestContext.
+scenario = scenario.
+platform = platform.
+|)
+(
+class SimpleTests = TestContext (|
+crimestop|setUp)
+('as yet unclassified'
+setUp = (|policies|
+crimestop:: scenario on: platform.
+
+policies:: scenario UserPolicyManager crimestop: crimestop.
+policies deployDefaultPolicies: crimestop getPolicyLanguage.
+
+^ crimestop
+)
+testDeserialization = ( |task1|
+task1:: crimestop tamedPlatform mockupNetworking fileTransfer:  'C:\Me2\Apps-stateless\newspeak-current\Task1App.nof'.
+task1 main: crimestop tamedPlatform args: nil. 
+assert: true.
+)
+testInitializationIsEndowment = (
+assert: [crimestop run: InitializationIsEndowment]
+)
+testTask1 = ( |result|
+result:: crimestop run: Task1App.
+assert: result class = crimestop Factory.
+)) : ('as yet unclassified'
+TEST_CONTEXT = ())
+class UserStories = (|
+|)
+(
+class LocalTestContext = TestContext (| crimestop device syscalls crimestop2 device2 syscalls2
+|setUp)
+('as yet unclassified'
+setUp = ( |policies|
+crimestop:: scenario on: platform.
+device:: crimestop device.
+syscalls:: device crimestop tamedPlatform systemCalls.
+policies:: scenario UserPolicyManager crimestop: crimestop.
+policies deployDefaultPolicies: crimestop getPolicyLanguage.
+
+crimestop2:: scenario on: platform deviceName: 'device2'.
+device2:: crimestop2 device.
+syscalls2:: device2 crimestop tamedPlatform systemCalls.
+policies:: scenario UserPolicyManager crimestop: crimestop.
+policies deployDefaultPolicies: crimestop2 getPolicyLanguage.
+)) : ()
+class MultiApplicationTests = LocalTestContext (|
+|)
+('as yet unclassified'
+testCallCameraFromGallery = ( |app gallery|
+app:: scenario apps BasicCameraApp new.
+syscalls addApp: app name: 'BasicCameraApp'.
+app:: scenario apps PhotoGallery new.
+syscalls addApp: app name: 'PhotoGallery'.
+gallery:: (syscalls getApp: 'PhotoGallery').
+gallery makePhoto.
+assert: gallery currentPicture = 1
+)
+testCanInstall = ( |app|
+app:: scenario apps PhotoGallery new.
+assert: (syscalls addApp: app name: 'PhotoGallery').
+app:: scenario apps PhotoShop new.
+assert: (syscalls addApp: app name: 'PhotoShop').
+app:: scenario apps BasicCameraApp new.
+assert: (syscalls addApp: app name: 'BasicCameraApp').
+)) : ('as yet unclassified'
+TEST_CONTEXT = ())
+class SingleApplicationTests = LocalTestContext (|
+|)
+('as yet unclassified'
+testCallCameraFromGallery = ( |app gallery|
+app:: scenario apps BasicCameraApp new.
+syscalls addApp: app name: 'BasicCameraApp'.
+app:: scenario apps PhotoGallery new.
+syscalls addApp: app name: 'PhotoGallery'.
+gallery:: (syscalls getApp: 'PhotoGallery').
+
+gallery io revoke.
+gallery makePhoto.
+assert: ((gallery savePicture: gallery currentPicture as: 'anything') = (device crimestop CALL_DENIED)).
+)
+testShowDirectory = ( |app gallery dir|
+app:: scenario apps PhotoGallery new.
+syscalls addApp: app name: 'PhotoGallery'.
+gallery::(syscalls getApp: 'PhotoGallery').
+dir:: device fileSystem getHome addSubdirectory: 'dir1'.
+dir addAsFile: 1 atLocation: 'file1'.
+dir addAsFile: 2 atLocation: 'file2'.
+
+gallery showDirectory: 'dir1'.
+assert: gallery currentPicture = 2.
+)) : ('as yet unclassified'
+TEST_CONTEXT = (
+	
+))) : ()) : ()) : ()

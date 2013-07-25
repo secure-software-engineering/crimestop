@@ -1,0 +1,18 @@
+Newspeak3
+'AA-Crimestop'
+class Task2App packageUsing: ns = (| io app
+     AppExt = ns Task2.
+|)
+('as yet unclassified'
+main: p args: args = ( |temp1 app1|
+
+    temp1:: p mirrors.
+    io:: p mockupIO.
+    app:: AppExt init: (p collections OrderedCollection with: io). 
+    app run.
+
+    app1:: p blackMarket Deployment appFrom: 'C:\Me2\Apps-stateless\newspeak-current\Task2App.nof'. 
+    app1:: p permissionsService transform: app1. 
+    (p permissionsService isFactory: app1 AppExt) ifFalse: [halt.].
+
+)) : ()

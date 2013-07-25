@@ -1,0 +1,24 @@
+Newspeak3
+'AA-Crimestop'
+class Task1App packageUsing: ns = (|
+Networking
+|)
+(
+class Task1 = (| 
+collections
+|)
+('as yet unclassified'
+run = ( |temp|
+temp:: collections OrderedCollection new: 2.
+temp add: 1.
+temp add: 2.
+)) : ()'as yet unclassified'
+main: p args: args = ( |app MyArray|
+
+     MyArray:: p collections OrderedCollection.
+     app:: Task1 new. 
+     app collections: p collections.
+     Networking:: p Networking. 
+     app run.
+     ^ self Networking
+)) : ()

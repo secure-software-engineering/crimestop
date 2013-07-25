@@ -1,0 +1,17 @@
+Newspeak3
+'AA-Crimestop'
+class Task2 init: args = (|
+fileReader|init: args)
+('as yet unclassified'
+init: params = (
+	fileReader:: params at: 1.
+)
+run = (
+|readerInst| 
+	readerInst:: fileReader openFile: '/good/'.
+      readerInst openFile.
+      readerInst read. readerInst read. readerInst read.
+      readerInst closeFile.
+      readerInst read = nil ifFalse: [halt].
+    	readerInst:: fileReader openFile: '/evil/'.
+)) : ()

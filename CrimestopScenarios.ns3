@@ -1,0 +1,1472 @@
+Newspeak3
+'AA-Crimestop'
+class CrimestopScenarios packageUsing: ns forBase: crimestopBase = (|
+ImplementationBase = crimestopBase top.
+crimestopBase = crimestopBase.
+Policies = crimestopBase Policies.
+Component = crimestopBase Component.
+Crimestop = crimestopBase Crimestop.
+convenience = crimestopBase convenience.
+ActivationMirrors = ns ActivationMirrors.
+Task1App = ns Task1App  packageUsing: ns.
+Task2App = ns Task2App  packageUsing: ns.
+
+osScenario = OSScenario NewspeakMirrorsWorkaround: ns NewspeakMirrorsWorkaround.
+phoneScenario = PhoneScenario NewspeakMirrorsWorkaround: ns NewspeakMirrorsWorkaround.
+testTasks = TestTasks Component: Component Task1App: Task1App Task2App: Task2App.
+
+collections Dictionary List activationMirrors 
+|)
+(
+class OSScenario NewspeakMirrorsWorkaround: NewspeakMirrorsWorkaround = Scenario NewspeakMirrorsWorkaround: NewspeakMirrorsWorkaround (|
+baseCrimestop = crimestopBase CrimestopTransform.
+osLibraries  = OSLibraries Component: Component.
+|)
+(
+class Apps Component: Component = super Apps Component: Component (|
+OSApplication = outer OSScenario OSApplication. |)
+(
+class BasicCameraApp = OSApplication (| App = AppDef. app
+|)
+(
+class AppDef init: args = Component (|
+lastPicture ::= 0.
+|)
+('as yet unclassified'
+pushShutterButton = (
+lastPicture:: lastPicture +1.
+^ lastPicture
+)) : ()'as yet unclassified'
+install: p = ( |temp|
+temp:: App init: (collections OrderedCollection with: p io).
+^ temp
+)) : ()
+class FileAccessUser = OSApplication (|
+App = AppDef.
+|)
+(
+class AppDef io: io = Component (| ioLib = io.
+|)
+('as yet unclassified'
+createFileFrom: object named: name = (
+^ ioLib createFileFrom: object named: name
+)
+doNothing = (
+halt.
+)
+getFileForName: name = (
+^ ioLib getFileForName: name
+)
+getFileForToken: token = (
+^ ioLib getFileForToken: token
+)
+getHomeDir = (
+^ ioLib getHome.
+)) : ()'as yet unclassified'
+main: p args: args = ( |app|
+app:: App io: p FileAccess init.
+^ app
+)) : ()
+class PhotoGallery = (| App = AppDef. app
+|)
+(
+class AppDef init: args = Component (|
+bash io currentPicture net
+|init: args)
+('as yet unclassified'
+display: picture = (
+currentPicture:: picture.
+^ currentPicture
+)
+init: args = (
+bash:: args at: 1.
+io:: args at: 2.
+net:: args at: 3.
+)
+makePhoto = ( |photoAPI photo|
+photoAPI:: bash getApp: 'BasicCameraApp'.
+currentPicture:: photoAPI pushShutterButton.
+^ currentPicture
+)
+savePicture: picture as: location = (
+^ io addAsFile: picture atLocation: location
+)
+showDirectory: location = ( |dir|
+dir:: io getHome getFileAt: location.
+dir content values do: [:each| display: each content]
+)
+showPicture: location = (
+^ (io getFileAt: location) content
+)) : ()'as yet unclassified'
+install: p = (
+app:: App init: ((collections OrderedCollection with: p systemCalls) add: p io; add: p io; yourself).
+^ app
+)) : ()
+class PhotoProvider = (| App = AppDef. app
+|)
+(
+class AppDef init: args = Component (|
+bash net photos = outer CrimestopScenarios collections MutableArrayList with: 1.
+|init: args)
+('as yet unclassified'
+getPictures = (
+^ photos
+)
+init: args = (
+bash:: args at: 1.
+net:: args at: 2.
+)) : ()'as yet unclassified'
+install: p = (
+app:: App init: ((collections OrderedCollection with: p systemCalls) add: p io; add: p io; yourself).
+^ app
+)) : ()
+class PhotoShop = (|  App = AppDef. app
+
+|)
+(
+class AppDef init: args = Component (|
+io
+|init: args)
+('as yet unclassified'
+init: args = (
+io:: args at: 1
+)
+showPicture: location = (
+^ (io getFileAt: location) content
+)) : ()'as yet unclassified'
+install: p = ( |temp|
+temp:: App init: (collections OrderedCollection with: p io).
+^ temp
+)) : ()) : ()
+class Crimestop mirrors: mirrors
+top: top 
+activationMirrors: activationMirrors
+device: device
+collections: collections 
+platform: p = super Crimestop mirrors: mirrors
+ top: top 
+activationMirrors: activationMirrors
+device: device
+collections: collections 
+platform: p (|
+|)
+(
+class DefaultSystemPolicies platform: platform = Policies (|
+platform = platform.
+|)
+('as yet unclassified'
+deployDefaultPolicies: capabilityLanguage = ( |polmod|
+super deployDefaultPolicies: capabilityLanguage.
+polmod:: self PolicyLanguage new.
+
+polmod policyNamed: 'SystemProtection' executes:
+        [  :policy :messageContext |
+            policy isCapability: exampleComponents NewspeakMirrorsWorkaround  creationContext: messageContext.
+            policy refineModule: exampleComponents NewspeakMirrorsWorkaround  withCodeFrom: exampleComponents SafeMirrors creationContext: messageContext. ].
+
+polmod policyNamed: 'MyFilesystemSetup' executes:
+        [  :policy :messageContext |
+            policy inModule: platformParts FileAccess set: 'osFiles'  toValue: device fileSystem creationContext: messageContext].
+
+polmod policyNamed: 'MyNetworkingSetup' executes:
+        [  :policy :messageContext |
+            policy inModule: platformParts FileAccess set: 'osFiles'  toValue: device fileSystem creationContext: messageContext].
+)) : ()
+class TamedPlatform withPlatform: platform = super TamedPlatform withPlatform: platform (| 
+|)
+('as yet unclassified'
+addAssociations = (
+super addAssociations.
+
+addAssociationofSelector: 'Networking' toImplementation: platformParts NetworkOps.
+
+name: 'networking' refersTo: platformParts NetworkOps withArgs: (List with: device networkingSystem).
+name: 'io' refersTo: platformParts FileAccess withArgs: (List with: device fileSystem).
+
+name: 'mockupIO' refersTo: exampleComponents MockupIO withArgs: nil.
+name: 'mockupNetworking' refersTo: exampleComponents MockupNetworking withArgs: nil.
+)) : ()'as yet unclassified'
+device = (
+^ super device
+)) : ()
+class Device name: name = super Device name: name (|
+|)
+() : ()
+class OSApplication = (|
+Component = outer CrimestopScenarios Component.
+main |)
+() : ()
+class OSLibraries Component: Component = (|
+	Component = Component.
+|)
+(
+class LimitTraffic osNetwork: osNetwork = NetworkOps osNetwork: osNetwork (|
+     totalVolume ::= 0.
+     threshold = 30000.
+     maySend ::= true.
+|)
+(
+class HTTPSocket address: adr = super HTTPSocket address: adr (|
+|)
+() : ()'as yet unclassified'
+addVolume: vol = (
+   totalVolume:: totalVolume + vol.
+   (totalVolume > threshold)
+        ifTrue: [maySend:: false.].
+)) : ()
+class LimitedNetworking osNetwork: osNetwork = NetworkOps osNetwork: osNetwork (|
+|)
+(
+class LimitedSocket to: adr = super Socket address: adr (|
+|)
+('as yet unclassified'
+addressOK: adr = (
+^ true
+)) : ('as yet unclassified'
+address: adr = (
+(addressOK: adr)
+  ifTrue: [^ self to: adr]
+  ifFalse: [^ nil].
+))) : ()) : ()
+class PlatformParts Component: Component = super PlatformParts Component: Component (|
+|)
+(
+class FileAccess = Component (|
+osFiles|)
+(
+class File wrapping: osFile content: content = (|
+osFile = osFile.
+content = content.
+|)
+() : ('as yet unclassified'
+content: content = (
+^self wrapping: nil content: osFile content
+)
+wrapping: osFile = (
+^self wrapping: osFile content: osFile content
+))'as yet unclassified'
+addAsFile: object atLocation: location = (
+^ osFiles addAsFile: object atLocation: location
+)
+createFileFrom: object named: name = (
+^ osFiles createFileFrom: object named: name
+)
+getFileForName: location = (
+^ osFiles getFileAt: location.
+)
+getHome = (
+^ osFiles getHome
+)
+getRoot = (
+^ osFiles getRoot.
+)) : ()) : ()
+class UserPolicyManager crimestop: crimestop = super UserPolicyManager platform: crimestop tamedPlatform (|
+fileAccessManager = FileAccessManager osFiles: crimestop device fileSystem.
+crimestop = crimestop. |)
+(
+class FileAccessDAC = (| fileAccessManager
+|)
+('as yet unclassified'
+createFileFrom: object named: name = ( |superRes|
+superRes:: super createFileFrom: object named: name.
+fileAccessManager allowFile: superRes.
+^ superRes
+)
+getFileForName: location = ( |theFile|
+theFile:: super getFileForName: location.
+
+(fileAccessManager fileAllowed: theFile)
+    ifTrue: [^ theFile]
+    ifFalse: [^ nil].
+)) : ()
+class FileAccessManager osFiles: osFiles = (| osFiles = osFiles. permissions = Dictionary new. home = osFiles getHome.
+|init)
+('as yet unclassified'
+allowFile: file = (
+permissions at: file put: true
+)
+fileAllowed: file = (
+(permissions includesKey: file)
+    ifTrue: [^ permissions at: file]
+    ifFalse: [^ false]
+)
+forbidFile: file = (
+permissions at: file put: false
+)
+init = ( |node|
+permissions at: osFiles getRoot put: false.
+permissions at: home put: true.
+forbidFile: (home getFileAt: ' protected').
+)) : ()
+class FileAccessTokens = (| fileAccessManager
+|)
+(
+class Token forLocation: location = (|
+location = location.
+|)
+() : ()'as yet unclassified'
+createFileFrom: object named: name= ( |file token|
+file:: osFiles createFileFrom: object named: name.
+token:: Token forLocation: name.
+^ token
+)
+getFileForName: name= (
+^ nil.
+)
+getFileForToken: token = (
+^ osFiles getFileAt: token location
+)) : ()'as yet unclassified'
+deployDACPolicies: capabilityLanguage = ( |polmod|
+polmod:: capabilityLanguage new.
+
+polmod policyNamed: 'OS IO Tokens Policy' executes:
+        [  :policy :messageContext |
+            policy refineModule: platformParts FileAccess withCodeFrom: FileAccessDAC creationContext: messageContext.
+            policy inModule: FileAccessDAC set: 'fileAccessManager'  toValue: fileAccessManager creationContext: messageContext].
+)
+deployDefaultPolicies: capabilityLanguage = ( |polmod|
+super deployDefaultPolicies: capabilityLanguage.
+polmod:: capabilityLanguage new.
+
+polmod isCapability: platformParts FileAccess name: 'FileAccess'.
+polmod isCapability: platformParts NetworkOps name: 'Networking'.
+
+polmod policyNamed: 'OS IO Policy' executes:
+        [  :policy :messageContext |
+            policy isCapability: platformParts FileAccess creationContext: messageContext.].
+)
+deployTokenizationPolicy: capabilityLanguage = ( |polmod|
+polmod:: capabilityLanguage new.
+
+polmod policyNamed: 'OS IO DAC Policy' executes:
+        [  :policy :messageContext |
+            policy refineModule: platformParts FileAccess withCodeFrom: FileAccessTokens creationContext: messageContext.
+            policy inModule: FileAccessTokens set: 'fileAccessManager'  toValue: fileAccessManager creationContext: messageContext].
+)) : ()'as yet unclassified'
+exampleComponents = (
+^ super exampleComponents 
+)
+platformParts = (
+^ super platformParts	
+)) : ()
+class PhoneScenario NewspeakMirrorsWorkaround: NewspeakMirrorsWorkaround = Scenario NewspeakMirrorsWorkaround: NewspeakMirrorsWorkaround (|
+
+phoneLibraries  = PhoneLibraries Component: Component.
+baseCrimestop = crimestopBase CrimestopTransformContain.
+|)
+(
+class AndroidApplication = (| (* Every Apps need a main and needs its classes in slots.     Every apps needs a developer to communicate with anyone. *)
+Component = outer CrimestopScenarios Component. 
+developer main|)
+(
+class Activity = Component (|
+|)
+('as yet unclassified'
+onFocus = (
+	
+)) : ()
+class BroadcastReceiver = Component (|
+|)
+('as yet unclassified'
+receiveIntent: intent = (
+^ subclassResponsibility
+)) : ()
+class ContentProvider = Component (|
+|)
+() : ()
+class Intent action: action arguments: arguments = (|
+action = action. arguments = arguments.|)
+() : ()
+class Main = Activity (|
+|)
+() : ()
+class Service = Component (|
+|)
+() : ()'as yet unclassified'
+install: p = (
+subclassResponsibility.
+^ main
+)) : ()
+class Apps Component: Component = super Apps Component: Component (| AndroidApplication = outer PhoneScenario AndroidApplication.
+|)
+(
+class BasicCameraApp = AndroidApplication (|
+Main = MainDef.
+SnapRequestReceiver = SnapRequestReceiverDef.
+CameraService = CameraServiceDef. cameraService |developer:: 'Vendor')
+(
+class CameraServiceDef init: args = super Service (|
+lastPicture bash io
+|init: args)
+('as yet unclassified'
+init: args = (
+bash:: args at: 1.
+io:: args at: 2.
+lastPicture:: 0.
+)
+pushShutterButton = (
+lastPicture:: lastPicture +1.
+^ lastPicture
+)
+savePictureAs: name = ( |file|
+file:: io addToHome: lastPicture atLocation: name.
+^ file
+)) : ()
+class MainDef init: args = super Main (|
+bash cameraService
+|init: args)
+('as yet unclassified'
+init: args = (
+bash:: args at: 1.
+cameraService:: args at: 2.
+)
+pushShutterButton = (
+^ cameraService pushShutterButton
+)
+savePictureAs: name = (
+^ cameraService savePictureAs: name
+)) : ()
+class SnapRequestReceiverDef init: args = super BroadcastReceiver (| bash cameraService
+|)
+('as yet unclassified'
+init: args = (
+bash:: args at: 1.
+)
+receiveIntent: intent = ( |picture|
+picture:: cameraService pushShutterButton.
+bash sendMessage: (Intent action: 'aPhoto' arguments: picture).
+)) : ()'as yet unclassified'
+Intent = (
+^ super Intent
+)
+install: p = ( |systemCalls receiver|
+systemCalls:: p systemCalls.
+cameraService:: CameraService init: ((collections OrderedCollection with: systemCalls) add: p io; yourself ).
+main:: Main init: ((collections OrderedCollection with: systemCalls) add: cameraService; yourself).
+receiver:: SnapRequestReceiver init: (collections OrderedCollection with: systemCalls).
+receiver cameraService: cameraService.
+systemCalls subscribe: receiver toMessage: 'makePhoto'.
+^ main
+)) : ()
+class MalformedApp = AndroidApplication (|
+AClass = NonComponentClass.|developer:: 'Failure Inc')
+(
+class NonComponentClass = (|
+|)
+() : ()) : ()
+class PhotoGallery = AndroidApplication (| 
+Main = MainDef.
+PhotoReceiver = PhotoReceiverDef. photoReceiver
+|developer:: 'Photoview')
+(
+class MainDef init: args = super Main (| io bash currentPicture
+|init: args)
+('as yet unclassified'
+display: picture = (
+currentPicture:: picture.
+^ currentPicture
+)
+init: args = (
+bash:: args at: 1.
+io:: args at: 2.
+)
+loadPicture: location = (
+currentPicture:: (io getFileAt: location) content.
+^ currentPicture. 
+)
+makePhoto = (
+bash sendMessage: (Intent action: 'makePhoto' arguments: '').
+)
+savePicture: picture as: location = (
+^ io addAsFile: picture atLocation: location
+)
+showDirectory: location = ( |dir|
+dir:: io getHome getFileAt: location.
+dir content values do: [:each| display: each content]
+)) : ()
+class PhotoReceiverDef init: args = super BroadcastReceiver (| main
+|init: args)
+('as yet unclassified'
+init: args = (
+main:: args at: 1.
+)
+receiveIntent: intent= ( |photo|
+^ main display: intent arguments.
+)) : ()'as yet unclassified'
+Intent = (
+^ super Intent
+)
+install: p = ( |systemCalls|
+systemCalls:: p systemCalls.
+main:: Main init: ((collections OrderedCollection with: systemCalls) add: p io; yourself).
+photoReceiver:: PhotoReceiver init: (collections OrderedCollection with: main).
+systemCalls subscribe: photoReceiver toMessage: 'aPhoto'.
+^ main
+)) : ()
+class PhotoShop = AndroidApplication (| 
+Main = MainDef.
+PhotoReceiver = PhotoReceiverDef. photoReceiver
+|developer:: 'Photoview')
+(
+class MainDef init: args = super Main (| io bash currentPicture net
+|init: args)
+('as yet unclassified'
+editPhoto = (
+currentPicture:: currentPicture + 100.
+)
+init: args = (
+bash:: args at: 1.
+io:: args at: 2.
+net:: args at: 3.
+)
+makePhoto = (
+bash sendMessage: (Intent action: 'makePhoto' arguments: '').
+)
+savePictureAs: name = ( |file|
+file:: io addToHome: currentPicture atLocation: name.
+^ file
+)
+setPicture: picture = (
+currentPicture:: picture.
+^currentPicture
+)
+showPicture: location = (
+currentPicture:: (io getFileAt: location) content.
+^ currentPicture
+)) : ()
+class PhotoReceiverDef init: args = super BroadcastReceiver (| main
+|init: args)
+('as yet unclassified'
+init: args = (
+main:: args at: 1.
+)
+receiveIntent: intent= ( |photo|
+^ main setPicture: intent arguments.
+)) : ()'as yet unclassified'
+Intent = (
+^ super Intent
+)
+install: p = ( |systemCalls|
+systemCalls:: p systemCalls.
+main:: Main init: ((collections OrderedCollection with: systemCalls) add: p io; add: p io; yourself).
+photoReceiver:: PhotoReceiver init: (collections OrderedCollection with: main).
+systemCalls subscribe: photoReceiver toMessage: 'aPhoto'.
+^ main
+)) : ()
+class ToyAppCapabilityTransfer = AndroidApplication (|
+Main = MainDef.|developer:: 'Vendor')
+(
+class MainDef init: args = super Main (| io
+|init: args)
+('as yet unclassified'
+init: args = (
+)
+run = (
+io addAsFile: 33 atLocation: 'any'.
+^ true
+)) : ()'as yet unclassified'
+install: p = ( |main|
+main:: Main init.
+main io: (p permissionsService confideCapability: (p io) to: main).
+^ main
+)) : ()) : ()
+class Crimestop mirrors: mirrors top: top 
+activationMirrors: activationMirrors
+device: device
+collections: collections 
+platform: p = super Crimestop mirrors: mirrors
+top: top 
+activationMirrors: activationMirrors
+device: device
+collections: collections 
+platform: p (|
+|)
+(
+class DefaultSystemPolicies platform: platform = Policies (|
+platform = platform.
+|)
+('as yet unclassified'
+deployDefaultPolicies: capabilityLanguage = ( |aHashMap polmod|
+super deployDefaultPolicies: capabilityLanguage.
+polmod:: self PolicyLanguage new.
+aHashMap:: platform blackMarket Dictionary new: 10.
+
+polmod policyNamed: 'SystemProtection' executes:
+        [  :policy :messageContext |
+            policy isCapability: exampleComponents Mirrors creationContext: messageContext.
+            policy refineModule: exampleComponents Mirrors withCodeFrom: exampleComponents SafeMirrors creationContext: messageContext. ].
+)) : ()
+class TamedPlatform withPlatform: platform = super TamedPlatform withPlatform: platform (|
+
+|)
+('as yet unclassified'
+addAssociations = (
+super addAssociations.
+
+name: 'networking' refersTo: platformParts NetworkOps withArgs: (List with: device networkingSystem).
+name: 'io' refersTo: platformParts FileAccess withArgs: (List with: device fileSystem).
+
+name: 'mockupIO' refersTo: exampleComponents MockupIO withArgs: nil.
+name: 'mockupNetworking' refersTo: exampleComponents MockupNetworking withArgs: nil.
+)
+io = ( |shadowedCaller result|
+shadowedCaller:: (outer Crimestop activationMirrors onContext: thisContext) sender receiverMirror reflectee.
+
+result:: outer Crimestop sender: shadowedCaller sendsTo: platformParts FileAccess theMessage: 'osFiles:'  withArgs: ((Array new: 1) at: 1 put: device fileSystem; yourself).
+
+^ result)) : ()'as yet unclassified'
+_isConformant: object metaclass: metaclass = ( |slots mainMirror slot newMember|
+mainMirror:: mirrors ObjectMirror reflecting: object.
+slots:: (mirrors ClassMirror reflecting: object class) slots.
+
+slots mirrors do: [ :slotMirror |
+    slot:: (mainMirror getSlot: slotMirror reflectee ifFail: [halt.]) reflectee.
+    (slot = Component) ifFalse: [
+    slot isNil ifFalse: [
+       ((convenience isModef: slot metaclass: metaclass) or: (convenience isComponentDef: slot metaclass: metaclass))
+           ifFalse: [ (convenience isClass: slot metaclass: metaclass)
+              ifTrue: [^ false]
+              ifFalse: [
+                  (_isConformant: slot metaclass: metaclass) ifFalse: [^ false]].
+           ]. 
+       ].].].
+
+^ true
+)
+device = (
+^ super device
+)
+isConformant: object = (
+^ _isConformant: object metaclass: object class class class
+)) : ()
+class Device name: name = super Device name: name (|
+messageSystem = MessageSystem new.
+|)
+(
+class MessageSystem = (|
+private messageBindings = collections Dictionary new.
+|)
+('as yet unclassified'
+processIntent: intent = ( |receiver|
+receiver:: messageBindings at: intent action.
+receiver receiveIntent: intent
+)
+subscribe: recipient toMessage: string = (
+messageBindings at: string put: recipient.
+)) : ()
+class System = super System (|
+|)
+('as yet unclassified'
+addApp: app name: name = (
+(outer Device crimestop isConformant: app) ifFalse: [^ false].
+^ super addApp: app name: name
+)
+messageSystem = (
+^ outer Device messageSystem	
+)) : ()) : ()
+class PhoneLibraries Component: Component = (| Component = Component.
+FileAccess = outer PhoneScenario platformParts FileAccess.|)
+(
+class ReadOnly osFiles: osFiles = FileAccess osFiles: osFiles (|
+|)
+('as yet unclassified'
+addAsFile: object atLocation: location = (
+^ false
+)
+addSubdirectory: name = (
+^ nil
+)
+addToHome: object atLocation: location = (
+^ false
+)
+getRoot = (
+^nil.
+)) : ()
+class RestrictedWriteAccess osFiles: osFiles = FileAccess osFiles: osFiles (|
+|)
+('as yet unclassified'
+addAsFile: object atLocation: location = (
+(osFiles getRoot hasFile: location) ifTrue: [^ false].
+^ osFiles getRoot addAsFile: object atLocation: location
+)
+addSubdirectory: name = (
+^ nil
+)
+addToHome: object atLocation: location = (
+(osFiles getHome hasFile: location) ifTrue: [^ false].
+^ osFiles getHome addAsFile: object atLocation: location
+)
+getRoot = (
+^nil.
+)) : ()
+class WriteOnly osFiles: osFiles = FileAccess osFiles: osFiles (|
+|)
+('as yet unclassified'
+getFileAt: location = (
+^ false
+)
+getHome = (
+^ false
+)
+getRoot = (
+^ false
+)) : ()) : ()
+class PlatformParts Component: Component = super PlatformParts Component: Component (|
+|)
+(
+class FileAccess osFiles: osFiles = Component (|
+osFiles ::= osFiles.|)
+('as yet unclassified'
+addAsFile: object atLocation: location = (
+^ osFiles addAsFile: object atLocation: location
+)
+addSubdirectory: name = (
+^ getRoot addSubdirectory: name
+)
+addToHome: object atLocation: location = (
+^ osFiles addAtHome: object atLocation: location
+)
+getFileAt: location = (
+^ osFiles getFileAt: location.
+)
+getHome = (
+^ osFiles getHome
+)
+getRoot = (
+^ osFiles getRoot
+)
+init: args = (
+osFiles:: args at: 1.
+)) : ()
+class SystemCalls = super SystemCalls (|
+|)
+('as yet unclassified'
+sendMessage: intent = (
+^ system messageSystem processIntent: intent
+)
+subscribe: recipient toMessage: string= (
+^ system messageSystem subscribe: recipient toMessage: string.
+)) : ()) : ()
+class UserPolicyManager crimestop: crimestop = super UserPolicyManager platform: crimestop tamedPlatform (|
+platform= platform.
+
+|)
+(
+class ApplicationSpecificRefinements = PolicyLanguage (|
+|)
+(
+class SimpleDirective withCode: code name: name = super SimpleDirective withCode: code name: name (|
+|)
+('as yet unclassified'
+refineModule: moduleRef withCodeFrom: refinementRef ifIn: application creationContext: messageContext = (|clasz dependencyList module refinement |
+refinement:: getModefIfFactory: refinementRef. 
+module:: getModefIfFactory: moduleRef.
+dependencyList:: messageContext dependencyList.
+clasz:: messageContext clasz.
+
+((convenience _class: clasz containsMixin: module mixin butLacksRefinement: refinement)  
+and: (messageContext sender class = application))
+      ifTrue: [clasz:: refinement mixin apply: clasz].
+
+messageContext clasz: clasz.
+)) : ()) : ()'as yet unclassified'
+deployDefaultPolicies: capabilityLanguage = ( |polmod deployer MyLanguage|
+super deployDefaultPolicies: capabilityLanguage.
+deployer:: platform Deployment.
+MyLanguage:: PoliciesForTransfer mixinApply: PolicyLanguage.
+MyLanguage:: ChineseWallPolicies mixinApply: MyLanguage.
+MyLanguage:: ApplicationSpecificRefinements mixinApply: MyLanguage.
+polmod:: MyLanguage new.
+
+polmod isCapability: platformParts NetworkOps name: 'Networking'.
+
+polmod policyNamed: 'Phone IO Policy' executes:
+        [  :policy :messageContext |
+            policy isCapability: outer PhoneScenario platformParts FileAccess creationContext: messageContext.
+            policy refineModule: outer PhoneScenario platformParts FileAccess withCodeFrom: phoneLibraries RestrictedWriteAccess ifIn: outer PhoneScenario apps BasicCameraApp creationContext: messageContext.
+            policy refineModule: outer PhoneScenario platformParts FileAccess withCodeFrom: phoneLibraries ReadOnly ifIn: outer PhoneScenario apps PhotoGallery creationContext: messageContext.
+            policy refineModule: outer PhoneScenario platformParts FileAccess withCodeFrom: phoneLibraries WriteOnly ifIn: outer PhoneScenario apps BasicCameraApp creationContext: messageContext ].
+ 
+)) : ()'as yet unclassified'
+exampleComponents = (
+^ super exampleComponents 
+)
+platformParts = (
+^ super platformParts
+)) : ()
+class Scenario NewspeakMirrorsWorkaround: NewspeakMirrorsWorkaround = (| 
+apps = Apps Component: Component.
+platformParts = PlatformParts Component: Component.
+baseCrimestop = crimestopBase Crimestop.
+hub
+exampleComponents = LegacyExampleComponents Component: Component NewspeakMirrorsWorkaround: NewspeakMirrorsWorkaround.
+legacyVariousApps = LegacyVariousApps legacyExampleComponents: exampleComponents. |)
+(
+class Apps Component: Component = (| Component = Component.
+|)
+(
+class BasicCameraApp = (| lastPicture
+|)
+('as yet unclassified'
+pushShutterButton = (
+^ subclassResponsibility
+)) : ()
+class PhotoGallery = (|
+|)
+('as yet unclassified'
+display: picture = (
+^ subclassResponsibility
+)
+makePhoto = (
+^ subclassResponsibility
+)
+savePicture: picture as: location = (
+^ subclassResponsibility
+)
+showDirectory: location = (
+^ subclassResponsibility
+)
+showPicture: location = (
+^ subclassResponsibility
+)
+showRemoteLocation: name = (
+^ subclassResponsibility
+)) : ()
+class PhotoProvider = (|
+|)
+() : ()
+class PhotoShop = (|
+|)
+('as yet unclassified'
+showPicture: location = (
+^ subclassResponsibility
+)) : ()) : ()
+class Crimestop mirrors: mirrors top: top 
+activationMirrors: activationMirrors
+device: device
+collections: collections 
+platform: p = baseCrimestop mirrors: mirrors
+top: top 
+activationMirrors: activationMirrors
+collections: collections 
+platform: p (|
+device = device.
+|)
+(
+class PolicyLanguage = super PolicyLanguage (|
+|)
+() : ()
+class TamedPlatform withPlatform: platform = super TamedPlatform withPlatform: platform (|
+associations = Dictionary new.
+factoryAssociations = Dictionary new.
+|)
+('as yet unclassified'
+addAssociationofSelector: selector toImplementation: module = (
+factoryAssociations at: selector put: module.
+)
+addAssociations = (
+name: 'systemCalls' refersTo: platformParts SystemCalls withArgs: (List with: device system).
+)
+doesNotUnderstand: aMessage = ( |handler shadowedCaller result| 
+
+((associations includesKey: aMessage selector) or: (factoryAssociations includesKey: aMessage selector))
+    ifFalse: [^ super doesNotUnderstand: aMessage].
+
+(associations includesKey: aMessage selector) ifTrue: [
+handler:: associations at: aMessage selector.
+shadowedCaller:: (outer Crimestop activationMirrors onContext: thisContext) sender receiverMirror reflectee.
+result:: outer Crimestop sender: shadowedCaller instantiates: (handler at: 1) with: (handler at: 2).
+^ result].
+
+(factoryAssociations includesKey: aMessage selector) ifTrue: [
+handler:: factoryAssociations at: aMessage selector.
+^ outer Crimestop Factory forModef: handler
+].
+
+halt.
+
+)
+name: name refersTo: part withArgs: args = (
+associations at: name put: ((List with: part) add: args; yourself)	
+)) : ()) : ()
+class Device name: name = (|
+name = name.
+crimestop
+apps = collections Dictionary new: 6.
+system = System  new.
+fileSystem = FileSystem new.
+networkingSystem = NetworkingSystem hub: outer Scenario hub.
+|)
+(
+class FileSystem = (| private root = Directory new.
+home = Directory new.
+|root addFileObject: home atLocation: 'home'.
+home addFileObject:File dummyFile atLocation: 'protected')
+(
+class Directory = (|
+content = collections Dictionary new.
+|)
+('as yet unclassified'
+addAsFile: object atLocation: location = (
+^ content at: location put: (outer FileSystem File content: object)
+)
+addFileObject: object atLocation: location = (
+^ content at: location put: object
+)
+addSubdirectory: name = ( |dir|
+dir:: outer FileSystem Directory new.
+content at: name put: dir.
+^ dir
+)
+getFileAt: location = (
+(content includesKey: location)
+     ifTrue: [^ content at: location]
+     ifFalse: [^ nil].
+
+halt.
+)
+hasFile: location = (
+^ content includesKey: location
+)) : ()
+class File content: content = (|
+content ::= content.|)
+() : ('as yet unclassified'
+dummyFile = (
+^ self content: 'dummy'
+))'as yet unclassified'
+addAsFile: object atLocation: location = (
+^ root addAsFile: object atLocation: location
+)
+addAtHome: object atLocation: location = (
+^ home addAsFile: object atLocation: location
+)
+createFileFrom: object named: name = (
+^ home addFileObject: (File content: object) atLocation: name.
+)
+getFileAt: location = (
+^ home getFileAt: location
+)
+getHome = (
+^ root getFileAt: 'home'
+)
+getRoot = (
+^ root.
+)) : ()
+class NetworkingSystem hub: hub = (| hub = hub.
+|)
+(
+class Connection to: URL = (| URL = URL.
+|)
+() : ()) : ()
+class System = (|
+|)
+('as yet unclassified'
+addApp: app name: name = ( |activity safeApp|
+safeApp:: crimestop prepareImport: app.
+activity:: safeApp install: crimestop tamedPlatform.
+apps at: name put: activity.
+^ true
+)
+getApp: name = (
+^ apps at: name.
+)) : ()) : ()
+class LegacyExampleComponents Component: Component NewspeakMirrorsWorkaround: NewspeakMirrorsWorkaround = (|
+Component = Component.
+NewspeakMirrorsWorkaround = NewspeakMirrorsWorkaround.
+Mirrors = NewspeakMirrorsWorkaround.
+|)
+(
+class ContactList = Component (
+(*A ContactList that someone can use and retrieve, Vanilla implementation*)| 
+IO
+|)
+('as yet unclassified'
+init: args = (
+	IO: (args at: 1).
+)
+openList = (
+	^parse: (IO openFile: AndroidContactList).
+)) : ()
+class FilesCWDOnly = (|
+platformSpecificPathClass
+|)
+(
+class FilePath = (|
+|)
+() : ('as yet unclassified'
+currentDirectory = (
+	^platformSpecificPathClass currentDirectory
+))) : ()
+class JSONModule init: args = Component (|
+|init: args)
+('as yet unclassified'
+init: args = (
+	^nil.
+)) : ()
+class MockupIO = Component (
+(*As stand-in for a proper IO module that offers openFile*)|
+dependencies
+|)
+(
+class FileReader = ((*Allows to read from a file*)|
+file fileOpen pos
+|fileOpen:: false.
+pos:: 1)
+('as yet unclassified'
+closeFile = (
+	pos:: 0.
+      fileOpen:: false.
+      ^self
+)
+init: file = (
+    file:: file.
+    ^self
+)
+insert: string = (
+	^nil.
+)
+openFile = (
+	fileOpen:: true.
+      ^self.
+)
+read = (
+ 
+     (pos < 10) ifTrue: [
+           pos:: pos + 1.
+	      ^'a'] 
+           ifFalse: [
+           ^false]
+)) : ()'as yet unclassified'
+openFile: file = (
+	^(FileReader new) init: file
+)
+platformSpecificPathClass = (
+^nil.
+)) : ()
+class MockupIOCWD = (
+(*To be mixed into an MockupIO to control file system accesses to home*)|
+|)
+('as yet unclassified'
+openFile: file = ( 
+     (file = '/evil/') ifFalse: [
+	^(super openFile: file)].    
+)) : ()
+class MockupIOMonitor = (|
+|)
+(
+class FileReader = super FileReader (||)
+('as yet unclassified'
+read = (
+    fileOpen
+        ifTrue: [^super read] 
+        ifFalse: [^nil]. 
+)) : ()) : ()
+class MockupNetworking = Component (|
+|)
+(
+class Connection to: address = (|
+|)
+('as yet unclassified'
+wassup = (
+^'nothing'.
+)) : ()'as yet unclassified'
+openConnection: address = (
+	^Connection new.
+)) : ()
+class SafeMirrors = (
+(* Dummy, remove after refactoring *)|
+|)
+() : ()
+class SafeNetworking = (|
+|)
+(
+class Connection = super Connection (|
+|)
+('as yet unclassified'
+wassup = (
+
+)) : ()'as yet unclassified'
+init: args = (
+)) : ()
+class WWW1 = ((*A mixin for the HTTP module to simulate that someone is there on the other side.*)|
+twitterMockup|)
+(
+class FauxTwitterServer OuterWWW1Connection: Connection = (|
+ConnectionLocalCopy = Connection.
+|)
+(
+class ClientConnection = ConnectionLocalCopy (|
+
+|)
+('as yet unclassified'
+wassup = (
+      super wassup.
+	^'nyan nyan nyan'.
+)) : ()'as yet unclassified'
+openConnection = (
+^ClientConnection new.
+)) : ()'as yet unclassified'
+init: args = (
+	super init: args.
+      twitterMockup:: FauxTwitterServer OuterWWW1Connection: Connection.
+     
+)
+openConnection: address = (
+(address = 'HTTPTwitterCOM')
+    ifTrue: [^twitterMockup openConnection.]
+    ifFalse: [^super openConnection: address.].
+)) : ()
+class WWW2 = (| Deployment 
+|)
+('as yet unclassified'
+fileTransfer: site = (
+	     ^ Deployment appFrom: site. 
+)
+init: args = (
+	super init: args.
+)) : ()) : ()
+class LegacyVariousApps legacyExampleComponents: legacyExampleComponents = (| 
+legacyExampleComponents = legacyExampleComponents.
+Component = legacyExampleComponents Component.
+
+ChineseWallTestApp = ChineseWallTestAppDef new.
+Messenger = TwitterDef new.
+|)
+(
+class ChineseWallTest init: args = Component (| dependency1 dependency2
+|init: args)
+('as yet unclassified'
+init: params = (
+    dependency1:: (params at: 1).
+)
+run = (
+dependency2 mayIuse.
+dependency1 mayIuse ifFalse: [halt.].
+dependency2 platformSpecificPathClass.
+dependency1 mayIuse ifTrue: [halt.].
+)) : ()
+class ChineseWallTestAppDef = (|
+    ChineseWallTest = outer LegacyVariousApps ChineseWallTest.|)
+('as yet unclassified'
+main: p args: args = (|networking io app arguments temp1|
+
+    networking:: p mockupNetworking .
+    io:: p mockupIO.
+    arguments:: p collections MutableArrayList with: networking.
+    app:: ChineseWallTest init: arguments.
+    app dependency2: io.
+    app run.
+)) : ()
+class TwitterClient = Component (
+(**)| jsonParser networkConnection session myName
+|)
+(
+class Session id: id password: password = (
+(**)| networkAdapter id = id. password = password. session
+|)
+('as yet unclassified'
+connect = (
+	session:: networkAdapter openConnection: 'HTTPTwitterCOM'.
+)
+getNewMessages = (
+	^session wassup.
+)) : ()'as yet unclassified'
+Login: id pwd: password = ( |temp1|
+    myName: id.
+    session:: Session id: id password: password.
+    session networkAdapter: networkConnection.
+    session connect.
+    ^session.
+)
+init: args = (
+	jsonParser: (args at: 1).
+	networkConnection: (args at: 2).
+)) : ()
+class TwitterClientGUI = Component ((**)|
+    TwitterClient twitterClientInstance
+    serverConnection
+|)
+('as yet unclassified'
+init: args = ( |Arrays temp|
+Arrays:: args at: 4.
+TwitterClient:: args at: 1.
+temp:: Arrays new: 2.
+temp add: (args at: 2).
+temp add: (args at: 3).
+twitterClientInstance:: TwitterClient init: temp.
+)
+loginPressed = ( |temp|
+serverConnection:: twitterClientInstance Login: nil pwd: nil.
+serverConnection 
+    ifNotNil: [(serverConnection getNewMessages = 'nyan nyan nyan') ifFalse: [halt.]]
+    ifNil: [halt.].
+)) : ()
+class TwitterDef = (|
+GUI = outer LegacyVariousApps TwitterClientGUI.
+ContactList  = legacyExampleComponents ContactList.
+Networking = legacyExampleComponents MockupNetworking.
+JSONModule = legacyExampleComponents JSONModule.
+MockupIO = legacyExampleComponents MockupIO.
+TwitterClient = outer LegacyVariousApps TwitterClient.
+|)
+('as yet unclassified'
+main: p args: args = (
+	|gui contacts networking json twitterOpsLogger twitterClient temp aliens Arrays|
+
+Arrays:: p collections OrderedCollection.
+
+      json:: JSONModule init.
+      networking:: p mockupNetworking .
+
+     temp:: (Arrays new: 2) add: MockupIO; add: Arrays; yourself.
+	contacts:: ContactList init: temp.
+
+     temp:: (Arrays new: 2) add: json; add: networking; yourself.
+     twitterClient:: TwitterClient init: temp.
+
+     temp:: (Arrays new: 5) add: TwitterClient;
+         add: json; add: networking; add: Arrays; yourself.
+     gui:: GUI init: temp.
+
+    gui loginPressed.
+)) : ()) : ()
+class PlatformParts Component: Component = (|
+Component = Component.
+|)
+(
+class NetworkOps osNetwork: osNetwork = Component (| osNetwork ::= osNetwork.
+|)
+(
+class HTTPSocket address: address port: port = Socket address: address port: port (|
+|)
+() : ()
+class Socket address: address port: port = (|
+address = address. 
+port = port.
+|)
+() : ()'as yet unclassified'
+init: args = (
+osNetwork:: args at: 1.
+)) : ()
+class SystemCalls = (| system
+|)
+('as yet unclassified'
+addApp: app name: name = (
+^ system addApp: app name: name
+)
+getApp: name = (
+^ system getApp: name
+)
+init: args = (
+system:: args at: 1
+)) : ()) : ()
+class TheHub = (| dict = outer CrimestopScenarios collections Dictionary new.
+|)
+('as yet unclassified'
+at: key <ByteSymbol> put: device <Device> = (
+^ dict at: key put: device
+)) : ()
+class UserPolicyManager platform: platform = Policies (|
+platform = platform.|)
+(
+class ChineseWallPolicies = PolicyLanguage (|
+policyState
+|init)
+(
+class ChineseWallCallback east: east west: west usedList: usedList = DereferencingCallback (|
+east = east. 
+west = west. 
+usedList = usedList.
+|)
+('as yet unclassified'
+checkSender: sender callee: callee selector: selector args: arguments systemInfo: systemInfo = (|result|
+(saysItsATest: systemInfo) ifFalse: [usedList recordModule: sender usedCapability: callee].
+result:: true.
+
+result:: result and: (
+   nand: (callee capability = east mixin) 
+   with:  [usedList module: sender hasRequestedCapability: west]).
+result:: result and: (
+   nand: [usedList module: sender hasRequestedCapability: east] 
+   with:  (callee capability = west mixin)).
+
+^result.
+)
+nand: first with: second = (
+^(first value and: second value) not.
+)
+saysItsATest: systemInfo = (
+^systemInfo ifNil: [^false]
+                   ifNotNil: [^systemInfo isDereferencingCheck].
+)) : ()
+class ChineseWallPolicy withCode: code name: name = SimpleDirective withCode: code name: name (| 
+|)
+('as yet unclassified'
+allowEither: eastRef or: westRef creationContext: creationContext = (| mixins temp east west|
+(*- Check that the contexts are alright, inlcuding with the current module.*)
+east:: getModefIfFactory: eastRef. west:: getModefIfFactory: westRef.
+mixins:: outer ChineseWallPolicies Set new.
+mixins addAll: (outer ChineseWallPolicies allMixinsOf: creationContext clasz).
+
+creationContext dependencyList dependencies do: 
+    [:argument | mixins addAll: 
+        (outer ChineseWallPolicies allMixinsOf: (getModefIfFactory: westRef)) ].
+
+((mixins includes: east mixin) and: (mixins includes: west mixin))
+  ifTrue: [creationContext forbidCreation. halt. ^nil.].
+
+((mixins includes: (east mixin)) or: (mixins includes: (west mixin)))
+   ifTrue: [creationContext addCallback: (ChineseWallCallback 
+                  east: east 
+                  west: west
+                  usedList: (outer ChineseWallPolicies policyState)  )].
+
+)) : ()'as yet unclassified'
+allMixinsOf: object = (|mixins current |
+mixins:: Set new.
+((object) class class class = self class class class) 
+    ifTrue:[current:: object class.]
+    ifFalse:[current:: object.].
+
+  [ mixins add: (current mixin).]
+  doWhileFalse: [current:: current superclass. current = Top].
+^mixins.
+)
+chineseWallPolicy: name executes: block = ( |policy|
+addDirective: (ChineseWallPolicy withCode: block name: name).
+)
+init = (
+policyState:: outer UserPolicyManager UsedCapabilityList fromDict: Dictionary.
+)) : ()
+class PoliciesForTransfer = PolicyLanguage (|
+endowedCapabilities = outer UserPolicyManager UsedCapabilityList fromDict: Dictionary.
+|init)
+(
+class RegisteringEndowment = EndowmentCallback (|
+|)
+('as yet unclassified'
+givenCap: cap toModule: module = (
+outer PoliciesForTransfer endowedCapabilities recordModule: module withCapability: cap
+)) : ()'as yet unclassified'
+addRegisteringEndowment = (
+_resolver  addEndowmentCallback: RegisteringEndowment new.
+)) : ()
+class UsedCapabilityList fromDict: Dictionary = (|
+state = Dictionary new.
+Dictionary = Dictionary.
+|)
+('as yet unclassified'
+module: module hasRequestedCapability: capability = ( |entry|
+entry:: (state associationAt: module hash ifAbsent: [nil]).
+entry ifNil: [^false].
+(entry value associationAt: (capability mixin hash) ifAbsent: [nil])
+    ifNil: [^false]
+    ifNotNil: [^true]
+)
+recordModule: module usedCapability: capability = ( |moduleEntry|
+recordModule: module withCapability: capability
+)
+recordModule: module withCapability: capability = ( |moduleEntry|
+state at: (module hash) 
+    ifPresent: [:entries|
+          entries at: (capability capability hash) put: capability; yourself] 
+    ifAbsentPut: [|entries| 
+         entries:: Dictionary new.
+         entries at: (capability capability hash) put: capability.
+         entries.].
+)) : ()'as yet unclassified'
+deployDefaultPolicies: capabilityLanguage = ( |polmod deployer MyLanguage|
+super deployDefaultPolicies: capabilityLanguage.
+deployer:: platform Deployment.
+MyLanguage:: PoliciesForTransfer mixinApply: PolicyLanguage.
+MyLanguage:: ChineseWallPolicies mixinApply: MyLanguage.
+polmod:: MyLanguage new.
+
+polmod addRegisteringEndowment.
+
+polmod policyNamed: 'MockupIO Policy' executes:
+        [  :policy :messageContext |
+            policy isCapability: (exampleComponents MockupIO) creationContext: messageContext.
+            policy refineModule: (exampleComponents MockupIO) withCodeFrom: exampleComponents MockupIOMonitor creationContext: messageContext.
+            policy refineModule: (exampleComponents MockupIO) withCodeFrom: exampleComponents MockupIOCWD creationContext: messageContext.].
+
+polmod policyNamed: 'MockupNetwork Policy' executes:
+        [  :policy :messageContext |
+            policy isCapability: (exampleComponents MockupNetworking) creationContext: messageContext.
+            policy refineModule: (exampleComponents MockupNetworking) withCodeFrom: (exampleComponents SafeNetworking)  creationContext: messageContext.
+            policy refineModule: (exampleComponents MockupNetworking) withCodeFrom: (exampleComponents WWW1) creationContext: messageContext.
+            policy refineModule: (exampleComponents MockupNetworking) withCodeFrom: (exampleComponents WWW2) creationContext: messageContext.
+            policy inModule: (exampleComponents MockupNetworking) set: 'Deployment'  toValue: deployer creationContext: messageContext].
+
+polmod chineseWallPolicy: 'Chinese Wall: IO or HTTP ' executes:
+        [  :policy :messageContext |
+            policy allowEither:  (exampleComponents MockupNetworking) or: (exampleComponents MockupIO) creationContext: messageContext.
+        ].
+
+)) : ()'as yet unclassified'
+on: p  = ( | crimestop|
+^ on: p deviceName: 'default'
+)
+on: p deviceName: name = ( | crimestop device|
+collections ifNil: [collections:: p collections. Dictionary:: p collections Dictionary. List:: p collections OrderedCollection].
+activationMirrors ifNil: [activationMirrors:: ActivationMirrors usingPlatform: p].
+hub ifNil: [hub:: TheHub new ].
+
+
+device:: Device name: name.
+
+crimestop:: Crimestop
+  mirrors: p mirrors
+  top: ImplementationBase 
+  activationMirrors: activationMirrors
+  device: device
+  collections: p collections
+  platform: p.
+
+crimestop tamedPlatform addAssociations.
+
+device crimestop: crimestop.
+hub at: name put: device.
+
+^ crimestop
+)) : ()
+class TestTasks Component: Component Task1App: Task1App Task2App: Task2App = (|
+Component = Component.
+Task1App = Task1App.
+Task2App = Task2App.
+|)
+(
+class CapabilitiesCanBePassed = (|
+App = CheckEndowed.
+|)
+('as yet unclassified'
+main: p args: args = (|networking app arguments|
+
+    networking:: p mockupNetworking .
+    arguments:: p collections MutableArrayList with: nil.
+    app:: App init: arguments.
+    app dependency: networking.
+    ^app run.
+
+)) : ()
+class CheckEndowed init: args = Component (| dependency
+|init: args)
+('as yet unclassified'
+init: args = (
+dependency:: args at: 1.
+)
+run = (
+^dependency mayIuse
+)) : ()
+class InitializationIsEndowment = (|
+    App = CheckEndowed.
+|)
+('as yet unclassified'
+main: p args: args = (|networking app arguments|
+
+    networking:: p mockupNetworking .
+    arguments:: p collections MutableArrayList with: networking.
+    app:: App init: arguments.
+    ^app run.
+
+)) : ()) : ()) : ()

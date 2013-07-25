@@ -1,0 +1,38 @@
+Newspeak3
+'AA-Crimestop'
+class CrimestopTestSetsConfig packageTestsUsing: ns = (|
+App2Location = 'C:\Me2\Apps-stateless\newspeak-current\Task2App.nof'.
+
+crimestopBase = ns CrimestopBase packageUsing: ns. 
+crimestopScenarios = ns CrimestopScenarios packageUsing: ns forBase: crimestopBase.
+
+crimestopTestSets = ns CrimestopTestSets testTasks: crimestopScenarios testTasks App2Location: App2Location.
+
+collections  |)
+('as yet unclassified'
+testModulesUsingPlatform: platform minitest: minitest = ( |crimestop policies|
+
+platform blackMarket Deployment appToNof: (crimestopTestSets Task1App).
+platform blackMarket Deployment appToNof: (crimestopTestSets Task2App).
+collections:: platform collections.
+
+^ {crimestopTestSets GoodthinkTesting usingPlatform: platform
+                    minitest: minitest
+                    goodthink: (crimestopBase goodthinkOn: platform).
+    crimestopTestSets CrimestopTesting usingPlatform: platform
+                    minitest: minitest
+                    crimestop: (crimestopBase on: platform).
+    crimestopTestSets ScenarioTesting usingPlatform: platform
+                    minitest: minitest
+                    scenario: (crimestopScenarios osScenario).
+    crimestopTestSets ScenarioTesting usingPlatform: platform
+                    minitest: minitest
+                    scenario: (crimestopScenarios phoneScenario).
+    crimestopTestSets OSTesting usingPlatform: platform
+                    minitest: minitest
+                    scenario: (crimestopScenarios osScenario)
+                    collections: collections .
+    crimestopTestSets PhoneTesting usingPlatform: platform
+                    minitest: minitest
+                    scenario: (crimestopScenarios phoneScenario)	
+})) : ()
