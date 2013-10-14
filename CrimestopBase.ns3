@@ -6,13 +6,14 @@ ActivationMirrors = ns ActivationMirrors.
 Mirrors =  ns NewspeakMirrorsWorkaround.
 Aliens = ns Aliens.
 convenience = Convenience new.
-Goodthink = GoodthinkFactories mixinApply: (GoodthinkGeneralSends mixinApply: (GoodthinkInitializers mixinApply: (GoodthinkConvenienceExtensions mixinApply: GoodthinkBase))).
-CrimestopTransform = CrimestopPermissionsService mixinApply: (CrimestopGeneralSends mixinApply: CrimestopInitializers).
+Goodthink = GoodthinkFactories mixinApply: (GoodthinkGeneralSends mixinApply: (GoodthinkInitializers mixinApply: (GoodthinkConvenienceExtensions mixinApply: GoodthinkCore))).
+Crimestop = TransformingCrimestop mixinApply:  (CrimestopExtraPlatformMessages mixinApply: (CrimestopInitializers mixinApply: CrimestopCore)).
+CrimestopTransform = CrimestopPermissionsService mixinApply: (CrimestopGeneralSends mixinApply: Crimestop).
 CrimestopTransformContain = CrimestopConfinement mixinApply: CrimestopTransform.
 collections
 |)
 (
-class Component = (|
+class Authorizer = (|
 |)
 () : ()
 class Convenience = (|
@@ -68,16 +69,16 @@ hasRedundantMixins: clasz = ( |known current|
     ].
     ^false.
 )
-isClass: object metaclass: metaclass = (
-^(object class class = metaclass)
+isAuthorizer: object <Class> = (
+^(convenience allMixinsOf: object class) includes: Authorizer mixin
 )
-isComponent: object <Class> = (
-^(convenience allMixinsOf: object class) includes: Component mixin
-)
-isComponentDef: object <Class> metaclass: metaclass <Class> = (
+isAuthorizerDef: object <Class> metaclass: metaclass <Class> = (
 (convenience isClass: object metaclass: metaclass) 
     ifFalse: [^ false] 
-    ifTrue:[^ ((convenience allMixinsOf: object) includes: Component mixin) and: ( (object = Component) not) ].
+    ifTrue:[^ ((convenience allMixinsOf: object) includes: Authorizer mixin) and: ( (object = Authorizer) not) ].
+)
+isClass: object metaclass: metaclass = (
+^(object class class = metaclass)
 )
 isModef: object <Class> metaclass: metaclass <Class> = (
 (isClass: object metaclass: metaclass) 
@@ -97,242 +98,16 @@ classes removeLast.
 
 ^  classes.
 )) : ()
-class Crimestop mirrors: mirrors top: top 
-activationMirrors: activationMirrors
-collections: collections 
-platform: p = Goodthink mirrors: mirrors top: top activationMirrors: activationMirrors collections: collections (| 
-tamedPlatform
-mirrors = mirrors.
-top = top.
-activationMirrors = activationMirrors.
-collections = collections.
-MyArray = collections OrderedCollection.
-Dictionary = collections Dictionary.
-Set = collections IdentitySet.
-platform = p.
-|(DefaultSystemPolicies platform: platform) deployDefaultPolicies: getPolicyLanguage.
-tamedPlatform:: TamedPlatform withPlatform: platform)
-(
-class AuthorityCheck giveCap: cap toModule: owner callbacks: callbacks master: master = ((**)|	
-pryvate = Privates cap: cap owner: owner callbacks: callbacks master: master. |master = (outer Crimestop) ifFalse: [halt.].
-outer Crimestop resolver givingCap: cap toModule: owner)
-(
-class Privates cap: cap owner: owner callbacks: callbacks master: master = (|capability ::= cap. owner::= owner. callbacks ::= callbacks. master = master.
-justAsking = JustAskingToken new.
-|)
-(
-class JustAskingToken = (|
-|)
-() : ()
-class SystemInfo = (| pryvate = Privates new.
-|)
-(
-class Privates = (| 
-Tokens = collections OrderedCollection new.
-|)
-() : ()'as yet unclassified'
-addToken: token = (
-self pryvate Tokens addLast: token.
-)
-isDereferencingCheck = ( (*deprived*)
-^((self pryvate Tokens indexOf: (outer AuthorityCheck pryvate justAsking)) = 0) not
-)) : ()'as yet unclassified'
-_componentOrModuleOf: instance = ( |next|
-instance class enclosingObjectSlot = nil ifTrue: [^ instance].
-(convenience isComponent: instance) ifTrue: [^ instance].
-
-^ _componentOrModuleOf:  instance class enclosingObjectSlot.
-)
-denyCall = (
-(owner = nil) ifTrue: [halt].
-)
-isAuthorizedSender: sender = (|temp|
-sender = owner ifTrue: [^true]. (*shortcut*)
-^(_componentOrModuleOf: sender) = (_componentOrModuleOf: owner)
-)) : ()'accessing'
-doesNotUnderstand: aMessage = ( |selector arguments sender temp mayCall| 
-selector:: aMessage selector.
-arguments:: aMessage arguments.
-temp:: (activationMirrors ActivationMirrorCompiledByNewspeak onContext: thisContext). 
-sender:: temp sender receiver.
-
-self pryvate capability ifNil: [self pryvate denyCall. ^ CALL_DENIED].
-
-(_callAllowedForSender: sender selector: selector arguments: arguments systemInfo: nil) 
-    ifFalse: [self pryvate denyCall. ^ CALL_DENIED].
-
-^self pryvate capability 
-                  perform: selector 
-                  withArguments: arguments
-)'actions'
-mayIuse = ( |temp sender sysInfo|
-temp:: (activationMirrors ActivationMirrorCompiledByNewspeak onContext: thisContext). 
-sender:: temp sender receiver.
-
-sysInfo:: (self pryvate SystemInfo new addToken: (self pryvate justAsking); yourself).
-^_callAllowedForSender: sender selector: nil arguments: nil systemInfo: sysInfo.
-)'restricted'
-_callAllowedForSender: sender selector: selector arguments: arguments systemInfo: systemInfo = ( |allowed|
-	allowed:: (self pryvate callbacks checkForSender: sender callee: (self pryvate capability) selector: selector withArguments: arguments systemInfo: systemInfo).
-
-^allowed.
-)
-cloneFor: module = (
-^AuthorityCheck giveCap: self pryvate capability toModule: module callbacks: self pryvate callbacks master: self pryvate master.
-)
-isAuthorized: sender= (
-^self pryvate isAuthorizedSender: sender.
-)
-revoke = (
-	self pryvate capability: nil.
-)) : ()
-class CALL_DENIED = (|
-|)
-() : ()
-class DefaultSystemPolicies platform: platform = Policies (|
-platform = platform.
-|)
-('as yet unclassified'
-deployDefaultPolicies: capabilityLanguage = ( |polmod|
-super deployDefaultPolicies: capabilityLanguage.
-polmod:: self PolicyLanguage new.
-     polmod policyNamed: 'NoMirrors' executes:
-        [  :policy :messageContext |
-            policy forbid: Mirrors creationContext: messageContext.].
-
-     polmod policyNamed: 'NoStackInspection' executes:
-        [  :policy :messageContext |
-            policy forbid: ActivationMirrors creationContext: messageContext.].
-
-     polmod policyNamed: 'No Foreign Functions' executes:
-        [  :policy :messageContext |
-            policy forbid: Aliens creationContext: messageContext.].
-)) : ()
-class PolicyLanguage = (|
-Top = outer Crimestop top.
-Set = outer Crimestop Set.
-MyArray = outer Crimestop MyArray.
-Dictionary = outer Crimestop Dictionary.
-Directive = outer Crimestop Directive.
-|)
-(
-class DereferencingCallback = (|
-|)
-('as yet unclassified'
-checkSender: sender callee: callee args: args privateInfo: info = (
-^subclassResponsibility.
-)) : ()
-class EndowmentCallback = (|
-|)
-('as yet unclassified'
-givenCap: cap toModule: instance = (
-^subclassResponsibility
-)) : ()
-class SimpleDirective withCode: code name: name = outer Crimestop Directive withCode: code name: name (|
-|)
-('as yet unclassified'
-forbid: moduleRef creationContext: messageContext = ( |module|
-module:: getModefIfFactory: moduleRef.
-(convenience _class: messageContext clasz containsMixin: module)
-    ifTrue: [messageContext sendPossible: false.].
-)
-inModule: moduleRef set: slotname toValue: aValue creationContext: messageContext = ( |module|
-module:: getModefIfFactory: moduleRef.
-(convenience  _class: messageContext clasz containsMixin: module)  
-    ifTrue: [messageContext additionalState at: slotname put: aValue.].
-)
-isCapability: moduleRep creationContext: messageContext  = (
-|searchTemp clasz sought_mixin module|
-    module:: getModefIfFactory: moduleRep.
-    sought_mixin:: module mixin.
-    clasz:: messageContext clasz.
-    (clasz = MyArray) ifTrue: [^false].
-    searchTemp:: clasz.
-
-    [searchTemp mixin = sought_mixin 
-           ifTrue: [messageContext isCapability: sought_mixin.].
-    searchTemp:: searchTemp superclass.]
-    doWhileFalse: [searchTemp = outer Crimestop implementationBase].
-)
-refineModule: moduleRef withCodeFrom: refinementRef creationContext: messageContext = (|clasz dependencyList module refinement |
-refinement:: getModefIfFactory: refinementRef. 
-module:: getModefIfFactory: moduleRef.
-dependencyList:: messageContext dependencyList.
-clasz:: messageContext clasz.
-
-(convenience _class: clasz containsMixin: module mixin butLacksRefinement: refinement) 
-      ifTrue: [clasz:: refinement mixin apply: clasz].
-
-messageContext clasz: clasz.
-)) : ()'as yet unclassified'
-_resolver = (
-	^outer Crimestop resolver.
-)
-addDirective: directive= (
-_resolver addDirective: directive.
-)
-addEndowmentCallback: endowmentCallback = (
-_resolver addEndowmentCallback: endowmentCallback.
-)
-isCapability: module name: selector = (
-^ outer Crimestop tamedPlatform addAssociationofSelector: selector toImplementation: module.
-)
-policyNamed: name executes: block = ( |policy| 
-_resolver addDirective: (SimpleDirective withCode: block name: name).
-)) : ()
-class RestrictedPolicyLanguage = PolicyLanguage (|
-|)
-(
-class SimpleDirective withCode: code name: name = super SimpleDirective withCode: code name: name (|
-|)
-() : ()) : ()
-class TamedPlatform withPlatform: platform = (|
-_platform = platform.
-deployer = DeploymentNew new.
-|)
-(
-class DeploymentNew = ( (*Smalltalk-Class -- cannot inherit*)||)
-('as yet unclassified'
-appFrom: filename = ( |app transformed|
-    app:: outer TamedPlatform _platform blackMarket Deployment appFrom: filename.
-    ^ app.
-)
-doesNotUnderstand: aMessage = ( 
-	^ outer TamedPlatform pryvate p Deployment perform: (aMessage selector) withArguments: (aMessage arguments).
-)) : ()'as yet unclassified'
-Deployment = (
-	^deployer.
-)
-doesNotUnderstand: aMessage = (
-	^_platform perform: (aMessage selector) withArguments: (aMessage arguments).
-)
-vmmirror = (
-	halt
-)) : ()'as yet unclassified'
-createAuthorityCheckFrom: instance authorizing: authorizee context: context = (
-    context isCapability
-        ifTrue:  [^AuthorityCheck giveCap: instance toModule: authorizee callbacks: context callbacks master: self]
-        ifFalse: [^instance.]
-)
-getPolicyLanguage = (
-^ RestrictedPolicyLanguage
-)
-prepareImport: object = (
-^ object
-)
-run: app = ( 
-^ app main: tamedPlatform args: nil.
-)) : ()
 class CrimestopConfinement mirrors: mirrors top: top 
 activationMirrors: activationMirrors
 collections: collections 
-platform: p = Crimestop mirrors: mirrors top: top 
+platform: p = CrimestopCore mirrors: mirrors top: top 
 activationMirrors: activationMirrors
 collections: collections 
 platform: p (|
 |)
 (
-class AuthorityCheck giveCap: cap toModule: owner callbacks: callbacks master: master = super AuthorityCheck giveCap: cap toModule: owner callbacks: callbacks master: master (|
+class ComponentGuard giveCap: cap toModule: owner callbacks: callbacks master: master = super ComponentGuard giveCap: cap toModule: owner callbacks: callbacks master: master (|
 |)
 ('as yet unclassified'
 CALL_DENIED = (
@@ -375,15 +150,7 @@ transform: app = (
 )) : ()
 class TamedPlatform withPlatform: platform = super TamedPlatform withPlatform: platform (|
 |)
-(
-class DeploymentNew = super DeploymentNew (|
-|)
-('as yet unclassified'
-appFrom: filename = ( |app transformed|
-    app:: super appFrom: filename.
-    transformed:: transform: app.
-    ^ transformed.
-)) : ()) : ()'as yet unclassified'
+() : ()'as yet unclassified'
 activationMirrors = (
 ^ super activationMirrors 
 )
@@ -407,6 +174,279 @@ prepareImport: object = (
 transform: app = (
 ^ super transform: app
 )) : ()
+class CrimestopCore mirrors: mirrors top: top 
+activationMirrors: activationMirrors
+collections: collections 
+platform: p = Goodthink mirrors: mirrors top: top activationMirrors: activationMirrors collections: collections (| 
+tamedPlatform
+mirrors = mirrors.
+top = top.
+activationMirrors = activationMirrors.
+collections = collections.
+MyArray = collections OrderedCollection.
+Dictionary = collections Dictionary.
+Set = collections IdentitySet.
+platform = p.
+|tamedPlatform:: TamedPlatform withPlatform: platform)
+(
+class CALL_DENIED = (|
+|)
+() : ()
+class ComponentGuard giveCap: cap toModule: owner callbacks: callbacks master: master = ((**)|	
+pryvate = Privates cap: cap owner: owner callbacks: callbacks master: master. |master = (outer CrimestopCore) ifFalse: [halt.].
+outer CrimestopCore resolver givingCap: cap toModule: owner)
+(
+class Privates cap: cap owner: owner callbacks: callbacks master: master = (|capability ::= cap. owner::= owner. callbacks ::= callbacks. master = master.
+justAsking = JustAskingToken new.
+|)
+(
+class JustAskingToken = (|
+|)
+() : ()
+class SystemInfo = (| pryvate = Privates new.
+|)
+(
+class Privates = (| 
+Tokens = collections OrderedCollection new.
+|)
+() : ()'as yet unclassified'
+addToken: token = (
+self pryvate Tokens addLast: token.
+)
+isDereferencingCheck = ( (*deprived*)
+^((self pryvate Tokens indexOf: (outer ComponentGuard pryvate justAsking)) = 0) not
+)) : ()'as yet unclassified'
+_componentOrModuleOf: instance = ( |next|
+instance class enclosingObjectSlot = nil ifTrue: [^ instance].
+(convenience isAuthorizer: instance) ifTrue: [^ instance].
+
+^ _componentOrModuleOf:  instance class enclosingObjectSlot.
+)
+denyCall = (
+(owner = nil) ifTrue: [halt].
+)
+isAuthorizedSender: sender = (|temp|
+sender = owner ifTrue: [^true]. (*shortcut*)
+^(_componentOrModuleOf: sender) = (_componentOrModuleOf: owner)
+)) : ()'accessing'
+doesNotUnderstand: aMessage = ( |selector arguments sender temp mayCall| 
+selector:: aMessage selector.
+arguments:: aMessage arguments.
+temp:: (activationMirrors ActivationMirrorCompiledByNewspeak onContext: thisContext). 
+sender:: temp sender receiver.
+
+self pryvate capability ifNil: [self pryvate denyCall. ^ CALL_DENIED].
+
+(_callAllowedForSender: sender selector: selector arguments: arguments systemInfo: nil) 
+    ifFalse: [self pryvate denyCall. ^ CALL_DENIED].
+
+^self pryvate capability 
+                  perform: selector 
+                  withArguments: arguments
+)'actions'
+mayIuse = ( |temp sender sysInfo|
+temp:: (activationMirrors ActivationMirrorCompiledByNewspeak onContext: thisContext). 
+sender:: temp sender receiver.
+
+sysInfo:: (self pryvate SystemInfo new addToken: (self pryvate justAsking); yourself).
+^_callAllowedForSender: sender selector: nil arguments: nil systemInfo: sysInfo.
+)'restricted'
+_callAllowedForSender: sender selector: selector arguments: arguments systemInfo: systemInfo = ( |allowed|
+	allowed:: (self pryvate callbacks checkForSender: sender callee: (self pryvate capability) selector: selector withArguments: arguments systemInfo: systemInfo).
+
+^allowed.
+)
+cloneFor: module = (
+^ComponentGuard giveCap: self pryvate capability toModule: module callbacks: self pryvate callbacks master: self pryvate master.
+)
+isAuthorized: sender= (
+^self pryvate isAuthorizedSender: sender.
+)
+revoke = (
+	self pryvate capability: nil.
+)) : ()
+class DefaultSystemPolicies platform: platform = Policies (|
+platform = platform.
+|)
+('as yet unclassified'
+deployDefaultPolicies: capabilityLanguage = ( |polmod Forbid|
+super deployDefaultPolicies: capabilityLanguage.
+polmod:: self DirectiveDeployer new.
+
+Forbid:: polmod SuppressionDirective.
+(*polmod addInstantiationDirective: (Forbid  forbid: Mirrors name: 'NoMirrors').
+polmod addInstantiationDirective: (Forbid  forbid: ActivationMirrors name: 'NoStackInspection').
+polmod addInstantiationDirective: (Forbid  forbid: Aliens name: 'No Foreign Functions').*)
+
+)) : ()
+class DirectiveDeployer = (|
+Top = outer CrimestopCore top.
+Set = outer CrimestopCore Set.
+MyArray = outer CrimestopCore MyArray.
+Dictionary = outer CrimestopCore Dictionary.
+AuthorityDirective =  outer CrimestopCore AuthorityDirective.
+ConfigurationDirective = outer CrimestopCore ConfigurationDirective.
+InstantiationDirective = outer CrimestopCore InstantiationDirective.
+|)
+(
+class DereferencingCallback = (|
+|)
+('as yet unclassified'
+checkSender: sender callee: callee args: args privateInfo: info = (
+^subclassResponsibility.
+)) : ()
+class EndowmentCallback = (|
+|)
+('as yet unclassified'
+givenCap: cap toModule: instance = (
+^subclassResponsibility
+)) : ()
+class FeedInStateDirective inClass: classRef set: slotname toValue: aValue name: name = InstantiationDirective name: name (| 
+classRef = classRef. 
+slotname = slotname. 
+aValue = aValue.
+|)
+('as yet unclassified'
+acceptClass: messageContext = ( |module|
+module:: getLibraryIfFactory: classRef.
+(convenience  _class: messageContext clasz containsMixin: module)  
+    ifTrue: [messageContext additionalState at: slotname put: aValue.].
+)) : ()
+class GuardedObjectDirective class: aClass name: name = InstantiationDirective name: name (| aClass  = aClass.
+|)
+('as yet unclassified'
+acceptClass: messageContext = ( 
+|searchTemp clasz sought_mixin module|
+    module:: getLibraryIfFactory: aClass.
+    sought_mixin:: module mixin.
+    clasz:: messageContext clasz.
+    (clasz = MyArray) ifTrue: [^false].
+    searchTemp:: clasz.
+
+    [searchTemp mixin = sought_mixin 
+           ifTrue: [messageContext isCapability: sought_mixin.].
+    searchTemp:: searchTemp superclass.]
+    doWhileFalse: [searchTemp = outer CrimestopCore implementationBase].
+)) : ()
+class PlatformInterceptDirective isCapability: clasz message: message name: name = ConfigurationDirective name: name (|
+clasz = clasz. message = message. |)
+('as yet unclassified'
+deploy = (
+^ outer CrimestopCore tamedPlatform addAssociationofSelector: message toImplementation: clasz.
+)) : ()
+class RefinementDirective refineModule: moduleRef withCodeFrom: refinementRef name: name = InstantiationDirective name: name (| 
+moduleRef = moduleRef. 
+refinementRef = refinementRef. 
+|)
+('as yet unclassified'
+acceptClass: messageContext = (
+|clasz dependencyList module refinement |
+refinement:: getLibraryIfFactory: refinementRef. 
+module:: getLibraryIfFactory: moduleRef.
+dependencyList:: messageContext dependencyList.
+clasz:: messageContext clasz.
+
+(convenience _class: clasz containsMixin: module mixin butLacksRefinement: refinement) 
+      ifTrue: [clasz:: refinement mixin apply: clasz].
+
+messageContext clasz: clasz.
+)) : ()
+class SuppressionDirective forbid: aClass name: name = InstantiationDirective name: name (| aClass = aClass.
+
+|)
+('as yet unclassified'
+acceptClass: messageContext = ( |module|
+module:: getLibraryIfFactory: aClass.
+(convenience _class: messageContext clasz containsMixin: aClass)
+    ifTrue: [messageContext sendPossible: false.].
+)) : ()'as yet unclassified'
+_resolver = (
+	^outer CrimestopCore resolver.
+)
+addConfigurationDirective: directive= (
+^ outer CrimestopCore addConfigurationDirective: directive
+)
+addEndowmentCallback: endowmentCallback = (
+_resolver addEndowmentCallback: endowmentCallback.
+)
+addInstantiationDirective: directive= (
+^ outer CrimestopCore addInstantiationDirective: directive
+)) : ()
+class Resolver collections: collections Top: Top = super Resolver collections: collections Top: Top (|
+|)
+('as yet unclassified'
+givingCap: cap toModule: instance = (
+endowmentCallbacks do: [:callback | callback givenCap: cap toModule: instance.]
+)) : ()
+class TamedPlatform withPlatform: platform = (|
+_platform = platform.
+deployer = DeploymentNew new.
+|)
+(
+class DeploymentNew = ( (*Smalltalk-Class -- cannot inherit*)||)
+('as yet unclassified'
+appFrom: filename = ( |app transformed|
+    app:: outer TamedPlatform _platform blackMarket Deployment appFrom: filename.
+    transformed:: transform: app.
+    ^ transformed.
+)
+doesNotUnderstand: aMessage = ( 
+	^ outer TamedPlatform pryvate p Deployment perform: (aMessage selector) withArguments: (aMessage arguments).
+)) : ()'as yet unclassified'
+Deployment = (
+	^deployer.
+)
+doesNotUnderstand: aMessage = (
+	^_platform perform: (aMessage selector) withArguments: (aMessage arguments).
+)
+vmmirror = (
+	halt
+)) : ()'as yet unclassified'
+createGuardIfNeeded: instance authorizing: authorizee context: context = (
+    context isCapability
+        ifTrue:  [^ComponentGuard giveCap: instance toModule: authorizee callbacks: context callbacks master: self]
+        ifFalse: [^instance.]
+)
+deployDefaultSystemPolicies = (
+	(DefaultSystemPolicies platform: platform) deployDefaultPolicies: DirectiveDeployer.
+)
+getDirectiveDeployer = (
+^ DirectiveDeployer
+)
+prepareImport: object = (
+^ object
+)
+run: app = ( 
+^ app main: tamedPlatform args: nil.
+)
+transform: object= (
+^ object.
+)) : ()
+class CrimestopExtraPlatformMessages mirrors: mirrors top: top 
+activationMirrors: activationMirrors
+collections: collections 
+platform: p = CrimestopCore mirrors: mirrors top: top 
+activationMirrors: activationMirrors
+collections: collections 
+platform: p (|
+|)
+(
+class TamedPlatform withPlatform: platform = super TamedPlatform withPlatform: platform (|
+factoryAssociations = outer CrimestopBase collections Dictionary new.
+|)
+('as yet unclassified'
+addAssociationofSelector: selector toImplementation: module = (
+factoryAssociations at: selector put: module.
+)
+doesNotUnderstand: aMessage = ( |handler shadowedCaller result| 
+
+(factoryAssociations includesKey: aMessage selector) ifTrue: [
+handler:: factoryAssociations at: aMessage selector.
+^ outer Crimestop Factory forModef: handler
+].
+
+^ super doesNotUnderstand: aMessage
+)) : ()) : ()
 class CrimestopGeneralSends mirrors: mirrors top: top 
 activationMirrors: activationMirrors
 collections: collections 
@@ -418,7 +458,7 @@ platform: p (|
 ('as yet unclassified'
 postSendCallback: context = (
 super postSendCallback: context.
-context instance: (createAuthorityCheckFrom: context instance authorizing: context sender context: context)
+context instance: (createGuardIfNeeded: context instance authorizing: context sender context: context)
 )) : ()
 class CrimestopInitializers mirrors: mirrors top: top 
 activationMirrors: activationMirrors
@@ -433,12 +473,12 @@ _transferCapabilities: context toInstance: instance = ( |current argsList|
 argsList:: context dependencyList visibleArgs.
 (1 to: argsList size) do: [ :value | 
         current:: argsList at: value.
-        ((mirrors ClassMirror reflecting: current) reflectee class) = AuthorityCheck
+        ((mirrors ClassMirror reflecting: current) reflectee class) = ComponentGuard
             ifTrue: [argsList at: value put: (current cloneFor: instance)]].
 )
 postInitCallback: context= (
 super postInitCallback: context.
-context instance: (createAuthorityCheckFrom: context instance authorizing: context sender context: context)
+context instance: (createGuardIfNeeded: context instance authorizing: context sender context: context)
 )
 preInitCallback: context = (
 super preInitCallback: context.
@@ -447,7 +487,7 @@ _transferCapabilities: context toInstance: context instance.
 class CrimestopPermissionsService mirrors: mirrors top: top 
 activationMirrors: activationMirrors
 collections: collections 
-platform: p = Crimestop mirrors: mirrors top: top 
+platform: p = CrimestopCore mirrors: mirrors top: top 
 activationMirrors: activationMirrors
 collections: collections 
 platform: p (|
@@ -465,21 +505,79 @@ class TamedPlatform withPlatform: platform = super TamedPlatform withPlatform: p
 permissionsService = (
 ^ PermissionsService new.
 )) : ()) : ()
-class GoodthinkBase mirrors: mirrors top: top activationMirrors: activationMirrors collections: collections = (|
+class GoodthinkConvenienceExtensions mirrors: mirrors top: top activationMirrors: activationMirrors collections: collections = GoodthinkCore mirrors: mirrors top: top activationMirrors: activationMirrors collections: collections (| convenienceExtensions = ConvenienceExtensions new.
+|setupDefaults)
+(
+class ConvenienceExtensions = (|
+|)
+(
+class ObjectMetadata = (|
+	gwngrj3k6rhks_dict
+|)
+('as yet unclassified'
+initAnnotations: hashMap = (
+	gwngrj3k6rhks_dict:: hashMap.
+)
+metadataIncludesKey: key = (
+	^gwngrj3k6rhks_dict includesKey: key
+)
+metadatumAt: key put: value = (
+	gwngrj3k6rhks_dict at: key put: value.
+)) : ()
+class RealClassInfo = (|realClass|)
+() : ()
+class WhatCapability = (| capability
+|)
+('as yet unclassified'
+setCapabilityType: capabilityMixin = (
+capability: capabilityMixin.
+)) : ()) : ()
+class GlobalRefinement with: ClassProvidingMixin name: name = super InstantiationDirective name: name (| ClassProvidingMixin = ClassProvidingMixin.
+|)
+('as yet unclassified'
+acceptClass: messageContext = (
+	messageContext dependencyList addRefinement: ClassProvidingMixin
+)) : ()'as yet unclassified'
+initializeMeta: instance premodule: clasz context: context = (
+     instance initAnnotations: outer Goodthink Dictionary new.    
+     instance realClass: clasz. 
+     instance setCapabilityType: context pryvate capability.
+)
+setupDefaults = ( |code|
+
+addInstantiationDirective: (outer GoodthinkConvenienceExtensions GlobalRefinement with: outer GoodthinkConvenienceExtensions convenienceExtensions ObjectMetadata name: 'ObjectMetadata').
+addInstantiationDirective: (outer GoodthinkConvenienceExtensions GlobalRefinement with: outer GoodthinkConvenienceExtensions convenienceExtensions WhatCapability name: 'WhatCapability').
+addInstantiationDirective: (outer GoodthinkConvenienceExtensions GlobalRefinement with: outer GoodthinkConvenienceExtensions convenienceExtensions RealClassInfo name: 'RealClassInfo').
+)) : ()
+class GoodthinkCore mirrors: mirrors top: top activationMirrors: activationMirrors collections: collections = (|
 mirrors = mirrors.
 implementationBase = top.
 activationMirrors = activationMirrors.
+configurationDirectives = collections OrderedCollection new.
+instantiationDirectives = collections OrderedCollection new.
 resolver = Resolver collections: collections Top: top.
 mirrorHelper = MirrorHelper mirrors: mirrors.
 |)
 (
-class Directive withCode: code name: name = (|
-acceptBlock = code. 
+class AuthorityDirective name: name = (|
 name = name.
 |)
+() : ()
+class ConfigurationDirective name: name = AuthorityDirective name: name (|
+
+|)
 ('as yet unclassified'
-acceptModule: messageContext = (
-    ^acceptBlock value: self value: messageContext.
+deploy = (
+^ subclassResponsibility
+)
+undeploy = (
+^ subclassResponsibility
+)) : ()
+class InstantiationDirective name: name = AuthorityDirective name: name (|
+|)
+('as yet unclassified'
+acceptClass: messageContext = (
+    ^ subclassResponsibility
 )) : ()
 class MirrorHelper mirrors: mirrors = (|
 mirrors = mirrors. |)
@@ -496,7 +594,6 @@ class Resolver collections: collections Top: Top = (|
     Dictionary = collections Dictionary.
     Set = collections Set.
     Top = Top.
-    directives = MyArray new.
     endowmentCallbacks = MyArray new.
 |)
 (
@@ -555,7 +652,7 @@ callbacks add: callback.
 )
 applyDirectives = (
       directives do: [ :policy | 
-         policy acceptModule: self.
+         policy acceptClass: self.
       ].
 )
 forbidCreation = (
@@ -567,7 +664,7 @@ isCapability = (
 isCapability: value = (
 self pryvate capability ifNotNil: [halt.] .(*huch!*)
 value ifNotNil: [self pryvate capability: value]
-ifNil: [halt.].
+        ifNil: [halt.].
 )
 sendPossible = (
 ^self pryvate sendPossible.
@@ -576,31 +673,29 @@ sendPossible: value = (
 value ifFalse: [self pryvate sendPossible: value]
 ifTrue: [halt.].
 )) : ()'as yet unclassified'
-addDirective: directive = (
-(isAlreadyDeployed: directive name)
-ifTrue: [halt]
-ifFalse: [directives add: directive]
-)
 addEndowmentCallback: endowmentCallback = (
 endowmentCallbacks add: endowmentCallback.
 )
 checkClass: class withArgsList: args sender: sender = ( |context| 
-     context:: SendContext new: class withArgs: args directives: directives sender: sender .
+     context:: SendContext new: class withArgs: args directives: instantiationDirectives sender: sender .
     ^context.
+)) : ()'as yet unclassified'
+addConfigurationDirective: directive = (
+(isAlreadyDeployed: directive name)
+    ifTrue: [halt].
+configurationDirectives add: directive.
+directive deploy.
 )
-givingCap: cap <RealClassInfo> toModule: instance <Fwitter> = (
-endowmentCallbacks do: [:callback | callback givenCap: cap toModule: instance.]
+addInstantiationDirective: directive = (
+(isAlreadyDeployed: directive name)
+    ifTrue: [halt].
+instantiationDirectives add: directive.
 )
 isAlreadyDeployed: name = (
-directives do: [ :directive | name = directive name ifTrue:[halt. ^ true]].
+configurationDirectives do: [ :directive | name = directive name ifTrue:[halt. ^ true]].
+instantiationDirectives do: [ :directive | name = directive name ifTrue:[halt. ^ true]].
 ^ false.
-)) : ()
-class SystemDirective withCode: code name: name = Directive withCode: code name: name (|
-|)
-('as yet unclassified'
-addGlobalRefinement: ClassDefiningMixin creationContext: messageContext = (
-	messageContext dependencyList addRefinement: ClassDefiningMixin.
-)) : ()'private'
+)'private'
 initializeInjectedState: instance from: additionalState = ( |objectMirror|
 	(additionalState size > 0) ifTrue: 
           [objectMirror:: mirrors ObjectMirror reflecting: instance.
@@ -609,52 +704,6 @@ initializeInjectedState: instance from: additionalState = ( |objectMirror|
                  objectMirror setSlot: key to: value ifFail:[halt.].].
 ]
 )) : ()
-class GoodthinkConvenienceExtensions mirrors: mirrors top: top activationMirrors: activationMirrors collections: collections = GoodthinkBase mirrors: mirrors top: top activationMirrors: activationMirrors collections: collections (| convenienceExtensions = ConvenienceExtensions new.
-|)
-(
-class ConvenienceExtensions = (|
-|)
-(
-class ObjectMetadata = (|
-	gwngrj3k6rhks_dict
-|)
-('as yet unclassified'
-initAnnotations: hashMap = (
-	gwngrj3k6rhks_dict:: hashMap.
-)
-metadataIncludesKey: key = (
-	^gwngrj3k6rhks_dict includesKey: key
-)
-metadatumAt: key put: value = (
-	gwngrj3k6rhks_dict at: key put: value.
-)) : ()
-class RealClassInfo = (|realClass|)
-() : ()
-class WhatCapability = (| capability
-|)
-('as yet unclassified'
-setCapabilityType: capabilityMixin = (
-capability: capabilityMixin.
-)) : ()) : ()
-class Resolver collections: collections Top: Top = super Resolver collections: collections Top: Top (|
-|init)
-('as yet unclassified'
-init = ( |code|
-code::         [  :policy :messageContext |
-             policy addGlobalRefinement: convenienceExtensions ObjectMetadata creationContext: messageContext.
-             policy addGlobalRefinement: convenienceExtensions WhatCapability creationContext: messageContext.
-             policy addGlobalRefinement: convenienceExtensions RealClassInfo creationContext: messageContext.].
-
-addDirective: (outer GoodthinkConvenienceExtensions SystemDirective withCode: code name: 'Metadata').
-)) : ()'as yet unclassified'
-SystemDirective = (
-^ super SystemDirective
-)
-initializeMeta: instance premodule: clasz context: context = (
-     instance initAnnotations: outer Goodthink Dictionary new.    
-     instance realClass: clasz. 
-     instance setCapabilityType: context pryvate capability.
-)) : ()
 class GoodthinkFactories mirrors: mirrors top: top activationMirrors: activationMirrors collections: collections = GoodthinkInitializers mirrors: mirrors top: top activationMirrors: activationMirrors collections: collections (|
 
 |)
@@ -662,7 +711,7 @@ class GoodthinkFactories mirrors: mirrors top: top activationMirrors: activation
 class Directive withCode: code name: name = super Directive withCode: code name: name (|
 |)
 ('as yet unclassified'
-getModefIfFactory: object = (
+getLibraryIfFactory: object = (
 object class = Factory
     ifTrue: [^object module]
     ifFalse: [^object].
@@ -683,11 +732,19 @@ init: args = ( |sender temp|
 temp:: outer Goodthink instantiateFromFactory: module with: args.
 ^temp.
 )) : ()
+class InstantiationDirective name: name = super InstantiationDirective name: name (|
+|)
+('as yet unclassified'
+getLibraryIfFactory: object = (
+object class = Factory
+    ifTrue: [^object module]
+    ifFalse: [^object].
+)) : ()
 class MirrorHelper mirrors: mirrors = super MirrorHelper mirrors: mirrors (|
 |)
 ('as yet unclassified'
 getSenderFromFactory = (
-^ getNthSender: 5.
+^ getNthSender: 4.
 )) : ()'as yet unclassified'
 instantiateFromFactory: preModule with: args = (|sender|
 ^self sender: (mirrorHelper getSenderFromFactory) instantiates: preModule with: args.
@@ -703,7 +760,7 @@ slots:: (mirrors ClassMirror reflecting: result class) slots.
 slots mirrors do: [ :slotMirror |
     slot:: (mainMirror getSlot: (slotMirror reflectee) ifFail: [halt.]) reflectee.
     slot isNil ifFalse: [
-       ((convenience isModef: slot metaclass: metaclass) or: (convenience isComponentDef: slot metaclass: metaclass))
+       ((convenience isModef: slot metaclass: metaclass) or: (convenience isAuthorizerDef: slot metaclass: metaclass))
            ifTrue: [newMember:: Factory forModef: slot]
            ifFalse: [ (convenience isClass: slot metaclass: metaclass)
               ifTrue: [newMember:: slot]
@@ -714,7 +771,7 @@ slots mirrors do: [ :slotMirror |
 
 ^result.
 )) : ()
-class GoodthinkGeneralSends mirrors: mirrors top: top activationMirrors: activationMirrors collections: collections = GoodthinkBase mirrors: mirrors top: top activationMirrors: activationMirrors collections: collections (|
+class GoodthinkGeneralSends mirrors: mirrors top: top activationMirrors: activationMirrors collections: collections = GoodthinkCore mirrors: mirrors top: top activationMirrors: activationMirrors collections: collections (|
 |)
 ('as yet unclassified'
 evaluateMessage: context = (| refinementList temp argen instance superclasses|   
@@ -747,7 +804,7 @@ sender: sender <Object> sendsTo: preModule <Class> theMessage: message <ByteSymb
     postSendCallback: context.
     ^ context instance.
 )) : ()
-class GoodthinkInitializers mirrors: mirrors top: top activationMirrors: activationMirrors collections: collections = GoodthinkBase mirrors: mirrors top: top activationMirrors: activationMirrors collections: collections (|
+class GoodthinkInitializers mirrors: mirrors top: top activationMirrors: activationMirrors collections: collections = GoodthinkCore mirrors: mirrors top: top activationMirrors: activationMirrors collections: collections (|
 |)
 ('as yet unclassified'
 initialize: instance module: context = ( |finalArgsList classMirror|
@@ -788,16 +845,16 @@ sender: sender instantiates: preModule with: args = (
     postInitCallback: context.     ^ context instance
 )) : ()
 class Policies = (|
-PolicyLanguage
+DirectiveDeployer
 |)
 ('as yet unclassified'
 deployDefaultPolicies: capabilityLanguage = (
-PolicyLanguage:: capabilityLanguage.
+DirectiveDeployer:: capabilityLanguage.
 )) : ()
 class TransformingCrimestop mirrors: mirrors top: top 
 activationMirrors: activationMirrors
 collections: collections 
-platform: p = Crimestop mirrors: mirrors top: top 
+platform: p = CrimestopCore mirrors: mirrors top: top 
 activationMirrors: activationMirrors
 collections: collections 
 platform: p (|
@@ -813,7 +870,7 @@ transform: object = ( |metaclass|
 
     object class class = self class class class ifTrue: [halt (* was given a class, not supported right now *)].
 
-    ((convenience isModef: object metaclass: metaclass) or: (convenience isComponentDef: object metaclass: metaclass)) ifTrue: [^ Factory forModef: object].
+    ((convenience isModef: object metaclass: metaclass) or: (convenience isAuthorizerDef: object metaclass: metaclass)) ifTrue: [^ Factory forModef: object].
 
     (convenience isClass: object metaclass: metaclass) ifTrue: [^ object].
 
@@ -833,7 +890,7 @@ goodthink::  Goodthink
 on: p = ( | crimestopper activationMirrors|
 collections ifNil: [collections:: p collections].
 activationMirrors:: ActivationMirrors usingPlatform: p.
-crimestopper:: Crimestop
+crimestopper:: CrimestopCore
   mirrors: p mirrors
   top: top
   activationMirrors: activationMirrors

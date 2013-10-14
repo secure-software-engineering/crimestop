@@ -22,6 +22,9 @@ collections:: platform collections.
     crimestopTestSets CrimestopTesting usingPlatform: platform
                     minitest: minitest
                     crimestop: (crimestopBase on: platform).
+    crimestopTestSets LegacyTesting usingPlatform: platform
+                    minitest: minitest
+                    scenario: (crimestopScenarios legacyScenario).
     crimestopTestSets ScenarioTesting usingPlatform: platform
                     minitest: minitest
                     scenario: (crimestopScenarios osScenario).

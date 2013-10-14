@@ -18,7 +18,6 @@ main: p args: args = ( |app MyArray|
      MyArray:: p collections OrderedCollection.
      app:: Task1 new. 
      app collections: p collections.
-     Networking:: p Networking. 
      app run.
-     ^ self Networking
+    ^ self
 )) : ()

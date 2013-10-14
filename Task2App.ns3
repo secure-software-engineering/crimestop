@@ -7,7 +7,7 @@ class Task2App packageUsing: ns = (| io app
 main: p args: args = ( |temp1 app1|
 
     temp1:: p mirrors.
-    io:: p mockupIO.
+    io:: p MockupIO init.
     app:: AppExt init: (p collections OrderedCollection with: io). 
     app run.
 
