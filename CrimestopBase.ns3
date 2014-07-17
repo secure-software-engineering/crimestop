@@ -442,7 +442,7 @@ doesNotUnderstand: aMessage = ( |handler shadowedCaller result|
 
 (factoryAssociations includesKey: aMessage selector) ifTrue: [
 handler:: factoryAssociations at: aMessage selector.
-^ outer Crimestop Factory forModef: handler
+^ Crimestop Factory forModef: handler
 ].
 
 ^ super doesNotUnderstand: aMessage
@@ -539,7 +539,7 @@ acceptClass: messageContext = (
 	messageContext dependencyList addRefinement: ClassProvidingMixin
 )) : ()'as yet unclassified'
 initializeMeta: instance premodule: clasz context: context = (
-     instance initAnnotations: outer Goodthink Dictionary new.    
+     instance initAnnotations: Goodthink Dictionary new.    
      instance realClass: clasz. 
      instance setCapabilityType: context pryvate capability.
 )
@@ -721,15 +721,15 @@ class Factory forModef: module = (| module = module.
 ('as yet unclassified'
 doesNotUnderstand: aMessage = ( |result| (* needs testing *)
     
-result:: outer Goodthink sender: (outer GoodthinkFactories mirrorHelper getNthSender: 3) sendsTo: module theMessage: aMessage selector withArgs: aMessage arguments.
+result:: Goodthink sender: (outer GoodthinkFactories mirrorHelper getNthSender: 3) sendsTo: module theMessage: aMessage selector withArgs: aMessage arguments.
 ^ result
 )
 init = ( |sender temp| 
-temp:: outer Goodthink instantiateFromFactory: module with: nil.
+temp:: Goodthink instantiateFromFactory: module with: nil.
 ^temp.
 )
 init: args = ( |sender temp| 
-temp:: outer Goodthink instantiateFromFactory: module with: args.
+temp:: Goodthink instantiateFromFactory: module with: args.
 ^temp.
 )) : ()
 class InstantiationDirective name: name = super InstantiationDirective name: name (|
