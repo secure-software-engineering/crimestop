@@ -123,7 +123,7 @@ allowed:: allowed and: (self pryvate isAuthorizedSender: sender).
 doesNotUnderstand: aMessage = ( |selector arguments sender temp mayCall| 
 selector:: aMessage selector.
 arguments:: aMessage arguments.
-temp:: (outer CrimestopConfinement activationMirrors ActivationMirrorCompiledByNewspeak onContext: thisContext). 
+temp:: (CrimestopConfinement activationMirrors ActivationMirrorCompiledByNewspeak onContext: thisContext). 
 sender:: temp sender receiver.
 
 self pryvate capability ifNil: [self pryvate denyCall. ^ CALL_DENIED].
@@ -143,10 +143,10 @@ class PermissionsService = super PermissionsService (|
 |)
 ('as yet unclassified'
 confideCapability: cap to: module = (
-	^(outer CrimestopConfinement confideCapability: cap to: module)
+	^CrimestopConfinement confideCapability: cap to: module
 )
 transform: app = (
-	^ outer CrimestopConfinement transform: app
+	^ CrimestopConfinement transform: app
 )) : ()
 class TamedPlatform withPlatform: platform = super TamedPlatform withPlatform: platform (|
 |)
@@ -193,8 +193,8 @@ class CALL_DENIED = (|
 |)
 () : ()
 class ComponentGuard giveCap: cap toModule: owner callbacks: callbacks master: master = ((**)|	
-pryvate = Privates cap: cap owner: owner callbacks: callbacks master: master. |master = (outer CrimestopCore) ifFalse: [halt.].
-outer CrimestopCore resolver givingCap: cap toModule: owner)
+pryvate = Privates cap: cap owner: owner callbacks: callbacks master: master. |master = (CrimestopCore) ifFalse: [halt.].
+CrimestopCore resolver givingCap: cap toModule: owner)
 (
 class Privates cap: cap owner: owner callbacks: callbacks master: master = (|capability ::= cap. owner::= owner. callbacks ::= callbacks. master = master.
 justAsking = JustAskingToken new.
@@ -214,7 +214,7 @@ addToken: token = (
 self pryvate Tokens addLast: token.
 )
 isDereferencingCheck = ( (*deprived*)
-^((self pryvate Tokens indexOf: (outer ComponentGuard pryvate justAsking)) = 0) not
+^((self pryvate Tokens indexOf: (ComponentGuard pryvate justAsking)) = 0) not
 )) : ()'as yet unclassified'
 _componentOrModuleOf: instance = ( |next|
 instance class enclosingObjectSlot = nil ifTrue: [^ instance].
@@ -280,13 +280,13 @@ polmod addInstantiationDirective: (Forbid  forbid: Aliens name: 'No Foreign Func
 
 )) : ()
 class DirectiveDeployer = (|
-Top = outer CrimestopCore top.
-Set = outer CrimestopCore Set.
-MyArray = outer CrimestopCore MyArray.
-Dictionary = outer CrimestopCore Dictionary.
-AuthorityDirective =  outer CrimestopCore AuthorityDirective.
-ConfigurationDirective = outer CrimestopCore ConfigurationDirective.
-InstantiationDirective = outer CrimestopCore InstantiationDirective.
+Top = CrimestopCore top.
+Set = CrimestopCore Set.
+MyArray = CrimestopCore MyArray.
+Dictionary = CrimestopCore Dictionary.
+AuthorityDirective = CrimestopCore AuthorityDirective.
+ConfigurationDirective = CrimestopCore ConfigurationDirective.
+InstantiationDirective = CrimestopCore InstantiationDirective.
 |)
 (
 class DereferencingCallback = (|
@@ -326,13 +326,13 @@ acceptClass: messageContext = (
     [searchTemp mixin = sought_mixin 
            ifTrue: [messageContext isCapability: sought_mixin.].
     searchTemp:: searchTemp superclass.]
-    doWhileFalse: [searchTemp = outer CrimestopCore implementationBase].
+    doWhileFalse: [searchTemp = CrimestopCore implementationBase].
 )) : ()
 class PlatformInterceptDirective isCapability: clasz message: message name: name = ConfigurationDirective name: name (|
 clasz = clasz. message = message. |)
 ('as yet unclassified'
 deploy = (
-^ outer CrimestopCore tamedPlatform addAssociationofSelector: message toImplementation: clasz.
+^CrimestopCore tamedPlatform addAssociationofSelector: message toImplementation: clasz.
 )) : ()
 class RefinementDirective refineModule: moduleRef withCodeFrom: refinementRef name: name = InstantiationDirective name: name (| 
 moduleRef = moduleRef. 
@@ -361,16 +361,16 @@ module:: getLibraryIfFactory: aClass.
     ifTrue: [messageContext sendPossible: false.].
 )) : ()'as yet unclassified'
 _resolver = (
-	^outer CrimestopCore resolver.
+	^CrimestopCore resolver.
 )
 addConfigurationDirective: directive= (
-^ outer CrimestopCore addConfigurationDirective: directive
+^ CrimestopCore addConfigurationDirective: directive
 )
 addEndowmentCallback: endowmentCallback = (
 _resolver addEndowmentCallback: endowmentCallback.
 )
 addInstantiationDirective: directive= (
-^ outer CrimestopCore addInstantiationDirective: directive
+^ CrimestopCore addInstantiationDirective: directive
 )) : ()
 class Resolver collections: collections Top: Top = super Resolver collections: collections Top: Top (|
 |)
@@ -386,12 +386,12 @@ deployer = DeploymentNew new.
 class DeploymentNew = ( (*Smalltalk-Class -- cannot inherit*)||)
 ('as yet unclassified'
 appFrom: filename = ( |app transformed|
-    app:: outer TamedPlatform _platform blackMarket Deployment appFrom: filename.
+    app:: TamedPlatform _platform blackMarket Deployment appFrom: filename.
     transformed:: transform: app.
     ^ transformed.
 )
 doesNotUnderstand: aMessage = ( 
-	^ outer TamedPlatform pryvate p Deployment perform: (aMessage selector) withArguments: (aMessage arguments).
+	^ TamedPlatform pryvate p Deployment perform: (aMessage selector) withArguments: (aMessage arguments).
 )) : ()'as yet unclassified'
 Deployment = (
 	^deployer.
@@ -432,7 +432,7 @@ platform: p (|
 |)
 (
 class TamedPlatform withPlatform: platform = super TamedPlatform withPlatform: platform (|
-factoryAssociations = outer CrimestopBase collections Dictionary new.
+factoryAssociations = CrimestopBase collections Dictionary new.
 |)
 ('as yet unclassified'
 addAssociationofSelector: selector toImplementation: module = (
@@ -497,7 +497,7 @@ class PermissionsService = (|
 |)
 ('as yet unclassified'
 isFactory: object = (
-	^(outer CrimestopPermissionsService isFactory: object)
+	^(CrimestopPermissionsService isFactory: object)
 )) : ()
 class TamedPlatform withPlatform: platform = super TamedPlatform withPlatform: platform (|
 |)
@@ -545,9 +545,9 @@ initializeMeta: instance premodule: clasz context: context = (
 )
 setupDefaults = ( |code|
 
-addInstantiationDirective: (outer GoodthinkConvenienceExtensions GlobalRefinement with: outer GoodthinkConvenienceExtensions convenienceExtensions ObjectMetadata name: 'ObjectMetadata').
-addInstantiationDirective: (outer GoodthinkConvenienceExtensions GlobalRefinement with: outer GoodthinkConvenienceExtensions convenienceExtensions WhatCapability name: 'WhatCapability').
-addInstantiationDirective: (outer GoodthinkConvenienceExtensions GlobalRefinement with: outer GoodthinkConvenienceExtensions convenienceExtensions RealClassInfo name: 'RealClassInfo').
+addInstantiationDirective: (GoodthinkConvenienceExtensions GlobalRefinement with: GoodthinkConvenienceExtensions convenienceExtensions ObjectMetadata name: 'ObjectMetadata').
+addInstantiationDirective: (GoodthinkConvenienceExtensions GlobalRefinement with: GoodthinkConvenienceExtensions convenienceExtensions WhatCapability name: 'WhatCapability').
+addInstantiationDirective: (GoodthinkConvenienceExtensions GlobalRefinement with: GoodthinkConvenienceExtensions convenienceExtensions RealClassInfo name: 'RealClassInfo').
 )) : ()
 class GoodthinkCore mirrors: mirrors top: top activationMirrors: activationMirrors collections: collections = (|
 mirrors = mirrors.
@@ -631,10 +631,10 @@ callbacks ifNotNil: [callbacks do: [:callback  |
 ^temp.
 )) : ()
 class DependencyList fromArgsList: argsList = (|
-dependencies = outer Resolver MyArray new.
-visibleArgs = outer Resolver MyArray new.
-analyses = outer Resolver MyArray new.
-refinements = outer Resolver MyArray new.
+dependencies = Resolver MyArray new.
+visibleArgs = Resolver MyArray new.
+analyses = Resolver MyArray new.
+refinements = Resolver MyArray new.
 |init: argsList)
 ('as yet unclassified'
 addElement: arg = (
@@ -721,7 +721,7 @@ class Factory forModef: module = (| module = module.
 ('as yet unclassified'
 doesNotUnderstand: aMessage = ( |result| (* needs testing *)
     
-result:: Goodthink sender: (outer GoodthinkFactories mirrorHelper getNthSender: 3) sendsTo: module theMessage: aMessage selector withArgs: aMessage arguments.
+result:: Goodthink sender: (GoodthinkFactories mirrorHelper getNthSender: 3) sendsTo: module theMessage: aMessage selector withArgs: aMessage arguments.
 ^ result
 )
 init = ( |sender temp| 

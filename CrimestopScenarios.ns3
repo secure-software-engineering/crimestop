@@ -221,12 +221,12 @@ serverConnection
     ifNil: [halt.].
 )) : ()
 class TwitterDef = (|
-GUI = outer UntrustedCode TwitterClientGUI.
+GUI = UntrustedCode TwitterClientGUI.
 ContactList  = legacyExampleAuthorizers ContactList.
 Networking = legacyExampleAuthorizers MockupNetworking.
 JSONModule = legacyExampleAuthorizers JSONModule.
 MockupIO = legacyExampleAuthorizers MockupIO.
-TwitterClient = outer UntrustedCode TwitterClient.
+TwitterClient = UntrustedCode TwitterClient.
 |)
 ('as yet unclassified'
 main: p args: args = (
@@ -331,12 +331,12 @@ acceptClass: creationContext = (
 |mixins temp east west|
 (*- Check that the contexts are alright, inlcuding with the current module.*)
 east:: getLibraryIfFactory: eastRef. west:: getLibraryIfFactory: westRef.
-mixins:: outer ChineseWallPolicies Set new.
-mixins addAll: (outer ChineseWallPolicies allMixinsOf: creationContext clasz).
+mixins:: ChineseWallPolicies Set new.
+mixins addAll: (ChineseWallPolicies allMixinsOf: creationContext clasz).
 
 creationContext dependencyList dependencies do: 
     [:argument | mixins addAll: 
-        (outer ChineseWallPolicies allMixinsOf: (getLibraryIfFactory: westRef)) ].
+        (ChineseWallPolicies allMixinsOf: (getLibraryIfFactory: westRef)) ].
 
 ((mixins includes: east mixin) and: (mixins includes: west mixin))
   ifTrue: [creationContext forbidCreation. halt. ^nil.].
@@ -345,7 +345,7 @@ creationContext dependencyList dependencies do:
    ifTrue: [creationContext addCallback: (ChineseWallCallback 
                   east: east 
                   west: west
-                  usedList: (outer ChineseWallPolicies policyState)  )].
+                  usedList: (ChineseWallPolicies policyState)  )].
 
 )) : ()'as yet unclassified'
 allMixinsOf: object = (|mixins current |
@@ -359,23 +359,23 @@ mixins:: Set new.
 ^mixins.
 )
 init = (
-policyState:: outer UserPolicyManager UsedCapabilityList fromDict: Dictionary.
+policyState:: UserPolicyManager UsedCapabilityList fromDict: Dictionary.
 )) : ()
 class PoliciesForTransfer = DirectiveDeployer (|
-endowedCapabilities = outer UserPolicyManager UsedCapabilityList fromDict: Dictionary.
+endowedCapabilities = UserPolicyManager UsedCapabilityList fromDict: Dictionary.
 |)
 (
 class EndowmentLogger = EndowmentCallback (|
 |)
 ('as yet unclassified'
 givenCap: cap toModule: module = (
-outer PoliciesForTransfer endowedCapabilities recordModule: module withCapability: cap
+PoliciesForTransfer endowedCapabilities recordModule: module withCapability: cap
 )) : ()
 class LogEndowmentDirective = ConfigurationDirective name: 'Log all endowments' (|
 |)
 ('as yet unclassified'
 deploy = (
-outer PoliciesForTransfer _resolver  addEndowmentCallback: EndowmentLogger new.
+PoliciesForTransfer _resolver  addEndowmentCallback: EndowmentLogger new.
 )) : ()) : ()
 class UsedCapabilityList fromDict: Dictionary = (|
 state = Dictionary new.
@@ -457,7 +457,7 @@ osLibraries  = OSLibraries Authorizer: Authorizer.
 |)
 (
 class Apps Authorizer: Authorizer = super Apps Authorizer: Authorizer (|
-OSApplication = outer OSScenario OSApplication. |)
+OSApplication = OSScenario OSApplication. |)
 (
 class BasicCameraApp = OSApplication (| App = AppDef. app
 |)
@@ -471,7 +471,7 @@ lastPicture:: lastPicture +1.
 ^ lastPicture
 )) : ()'as yet unclassified'
 install: p = ( |temp|
-temp:: App init: (outer OSScenario collections OrderedCollection with: p FileAccess init).
+temp:: App init: (OSScenario collections OrderedCollection with: p FileAccess init).
 ^ temp
 )) : ()
 class FileAccessUser = OSApplication (|
@@ -532,7 +532,7 @@ showPicture: location = (
 ^ (io getFileAt: location) content
 )) : ()'as yet unclassified'
 install: p = ( |collections|
-collections:: outer OSScenario collections.
+collections:: OSScenario collections.
 app:: App init: ((collections OrderedCollection with: p SystemCalls init) add: p FileAccess init; add: p Networking init; yourself).
 ^ app
 )) : ()
@@ -540,7 +540,7 @@ class PhotoProvider = (| App = AppDef. app
 |)
 (
 class AppDef init: args = Authorizer (|
-bash net photos = outer CrimestopScenarios collections MutableArrayList with: 1.
+bash net photos = CrimestopScenarios collections MutableArrayList with: 1.
 |init: args)
 ('as yet unclassified'
 getPictures = (
@@ -569,7 +569,7 @@ showPicture: location = (
 ^ (io getFileAt: location) content
 )) : ()'as yet unclassified'
 install: p = ( |temp|
-temp:: App init: (outer OSScenario collections OrderedCollection with: p FileAccess init).
+temp:: App init: (OSScenario collections OrderedCollection with: p FileAccess init).
 ^ temp
 )) : ()) : ()
 class Crimestop mirrors: mirrors
@@ -602,7 +602,7 @@ class Device name: name = super Device name: name (|
 |)
 () : ()
 class OSApplication = (|
-Authorizer = outer CrimestopScenarios Authorizer.
+Authorizer = CrimestopScenarios Authorizer.
 main |)
 () : ()
 class OSLibraries Authorizer: Authorizer = (|
@@ -688,7 +688,7 @@ theFile:: super getFileForName: location.
     ifTrue: [^ theFile]
     ifFalse: [^ nil].
 )) : ()
-class FileAccessManager osFiles: osFiles = (| osFiles = osFiles. permissions = outer OSScenario collections Dictionary new. home = osFiles getHome.
+class FileAccessManager osFiles: osFiles = (| osFiles = osFiles. permissions = OSScenario collections Dictionary new. home = osFiles getHome.
 |init)
 ('as yet unclassified'
 allowFile: file = (
@@ -759,7 +759,7 @@ baseCrimestop = crimestopBase CrimestopTransformContain.
 |)
 (
 class AndroidApplication = (| (* Every Apps need a main and needs its classes in slots.     Every apps needs a developer to communicate with anyone. *)
-Authorizer = outer CrimestopScenarios Authorizer. 
+Authorizer = CrimestopScenarios Authorizer. 
 developer main|)
 (
 class Activity = Authorizer (|
@@ -790,7 +790,7 @@ install: p = (
 subclassResponsibility.
 ^ main
 )) : ()
-class Apps Authorizer: Authorizer = super Apps Authorizer: Authorizer (| AndroidApplication = outer PhoneScenario AndroidApplication.
+class Apps Authorizer: Authorizer = super Apps Authorizer: Authorizer (| AndroidApplication = PhoneScenario AndroidApplication.
 |)
 (
 class BasicCameraApp = AndroidApplication (|
@@ -844,7 +844,7 @@ Intent = (
 )
 install: p = ( |systemCalls receiver collections|
 systemCalls:: p SystemCalls init.
-collections:: outer PhoneScenario collections.
+collections:: PhoneScenario collections.
 cameraService:: CameraService init: ((collections OrderedCollection with: systemCalls) add: p FileAccess init; yourself ).
 main:: Main init: ((collections OrderedCollection with: systemCalls) add: cameraService; yourself).
 receiver:: SnapRequestReceiver init: (collections OrderedCollection with: systemCalls).
@@ -902,7 +902,7 @@ Intent = (
 )
 install: p = ( |systemCalls collections|
 systemCalls:: p SystemCalls init.
-collections:: outer PhoneScenario collections.
+collections:: PhoneScenario collections.
 main:: Main init: ((collections OrderedCollection with: systemCalls) add: p FileAccess init; yourself).
 photoReceiver:: PhotoReceiver init: (collections OrderedCollection with: main).
 systemCalls subscribe: photoReceiver toMessage: 'aPhoto'.
@@ -953,8 +953,8 @@ Intent = (
 )
 install: p = ( |systemCalls|
 systemCalls:: p SystemCalls init.
-main:: Main init: ((outer PhoneScenario collections OrderedCollection with: systemCalls) add: p FileAccess init; add: p Networking init; yourself).
-photoReceiver:: PhotoReceiver init: (outer PhoneScenario collections OrderedCollection with: main).
+main:: Main init: ((PhoneScenario collections OrderedCollection with: systemCalls) add: p FileAccess init; add: p Networking init; yourself).
+photoReceiver:: PhotoReceiver init: (PhoneScenario collections OrderedCollection with: main).
 systemCalls subscribe: photoReceiver toMessage: 'aPhoto'.
 ^ main
 )) : ()
@@ -1016,7 +1016,7 @@ messageSystem = MessageSystem new.
 |)
 (
 class MessageSystem = (|
-private messageBindings = outer PhoneScenario collections Dictionary new.
+private messageBindings = PhoneScenario collections Dictionary new.
 |)
 ('as yet unclassified'
 processIntent: intent = ( |receiver|
@@ -1030,14 +1030,14 @@ class System = super System (|
 |)
 ('as yet unclassified'
 addApp: app name: name = (
-(outer Device crimestop isConformant: app) ifFalse: [^ false].
+(Device crimestop isConformant: app) ifFalse: [^ false].
 ^ super addApp: app name: name
 )
 messageSystem = (
-^ outer Device messageSystem	
+^ Device messageSystem	
 )) : ()) : ()
 class PhoneLibraries Authorizer: Authorizer = (| Authorizer = Authorizer.
-FileAccess = outer PhoneScenario platformParts FileAccess.|)
+FileAccess = PhoneScenario platformParts FileAccess.|)
 (
 class ReadOnly osFiles: osFiles = FileAccess osFiles: osFiles (|
 |)
@@ -1148,15 +1148,15 @@ MyLanguage:: PoliciesForTransfer mixinApply: DirectiveDeployer.
 MyLanguage:: ApplicationSpecificRefinements mixinApply: MyLanguage.
 polmod:: MyLanguage new.
 
-polmod addInstantiationDirective: (polmod GuardedObjectDirective class: outer PhoneScenario platformParts FileAccess name: 'Phone IO is Capability').
+polmod addInstantiationDirective: (polmod GuardedObjectDirective class: PhoneScenario platformParts FileAccess name: 'Phone IO is Capability').
 
 RefinementDirectivePerApp:: polmod RefinementDirectivePerApp.
 
-polmod addInstantiationDirective: (RefinementDirectivePerApp refineModule: outer PhoneScenario platformParts FileAccess withCodeFrom: phoneLibraries RestrictedWriteAccess ifIn: outer PhoneScenario apps BasicCameraApp name: 'Camera write restrictions').
+polmod addInstantiationDirective: (RefinementDirectivePerApp refineModule: PhoneScenario platformParts FileAccess withCodeFrom: phoneLibraries RestrictedWriteAccess ifIn: PhoneScenario apps BasicCameraApp name: 'Camera write restrictions').
 
-polmod addInstantiationDirective: (RefinementDirectivePerApp refineModule: outer PhoneScenario platformParts FileAccess withCodeFrom: phoneLibraries ReadOnly ifIn: outer PhoneScenario apps PhotoGallery name: 'Phone IO write restrictions').
+polmod addInstantiationDirective: (RefinementDirectivePerApp refineModule: PhoneScenario platformParts FileAccess withCodeFrom: phoneLibraries ReadOnly ifIn: PhoneScenario apps PhotoGallery name: 'Phone IO write restrictions').
 
-polmod addInstantiationDirective: (RefinementDirectivePerApp refineModule: outer PhoneScenario platformParts FileAccess withCodeFrom: phoneLibraries WriteOnly ifIn: outer PhoneScenario apps BasicCameraApp name: 'No camera reads').
+polmod addInstantiationDirective: (RefinementDirectivePerApp refineModule: PhoneScenario platformParts FileAccess withCodeFrom: phoneLibraries WriteOnly ifIn: PhoneScenario apps BasicCameraApp name: 'No camera reads').
  
 )) : ()'as yet unclassified'
 exampleAuthorizers = (
@@ -1235,10 +1235,10 @@ device = device.
 class Device name: name = (|
 name = name.
 crimestop
-apps = outer Scenario collections Dictionary new: 6.
+apps = Scenario collections Dictionary new: 6.
 system = System  new.
 fileSystem = FileSystem new.
-networkingSystem = NetworkingSystem hub: outer Scenario hub.
+networkingSystem = NetworkingSystem hub: Scenario hub.
 |)
 (
 class FileSystem = (| private root = Directory new.
@@ -1247,17 +1247,17 @@ home = Directory new.
 home addFileObject:File dummyFile atLocation: 'protected')
 (
 class Directory = (|
-content = outer Scenario collections Dictionary new.
+content = Scenario collections Dictionary new.
 |)
 ('as yet unclassified'
 addAsFile: object atLocation: location = (
-^ content at: location put: (outer FileSystem File content: object)
+^ content at: location put: (FileSystem File content: object)
 )
 addFileObject: object atLocation: location = (
 ^ content at: location put: object
 )
 addSubdirectory: name = ( |dir|
-dir:: outer FileSystem Directory new.
+dir:: FileSystem Directory new.
 content at: name put: dir.
 ^ dir
 )
@@ -1337,7 +1337,7 @@ addApp: app name: name = (
 getApp: name = (
 ^ system getApp: name
 )) : ()) : ()
-class TheHub = (| dict = outer Scenario collections Dictionary new.
+class TheHub = (| dict = Scenario collections Dictionary new.
 |)
 ('as yet unclassified'
 at: key <ByteSymbol> put: device <Device> = (
@@ -1347,20 +1347,20 @@ class UserPolicyManager platform: platform = Policies (|
 platform = platform.|)
 (
 class PoliciesForTransfer = DirectiveDeployer (|
-endowedCapabilities = outer UserPolicyManager UsedCapabilityList fromDict: Dictionary.
+endowedCapabilities = UserPolicyManager UsedCapabilityList fromDict: Dictionary.
 |)
 (
 class EndowmentLogger = EndowmentCallback (|
 |)
 ('as yet unclassified'
 givenCap: cap toModule: module = (
-outer PoliciesForTransfer endowedCapabilities recordModule: module withCapability: cap
+PoliciesForTransfer endowedCapabilities recordModule: module withCapability: cap
 )) : ()
 class LogEndowmentDirective = ConfigurationDirective name: 'Log all endowments' (|
 |)
 ('as yet unclassified'
 deploy = (
-outer PoliciesForTransfer _resolver  addEndowmentCallback: EndowmentLogger new.
+PoliciesForTransfer _resolver  addEndowmentCallback: EndowmentLogger new.
 )) : ()) : ()
 class UsedCapabilityList fromDict: Dictionary = (|
 state = Dictionary new.
