@@ -11,7 +11,7 @@ main: p args: args = ( |temp1 app1|
     app:: AppExt init: (p collections OrderedCollection with: io). 
     app run.
 
-    app1:: p blackMarket Deployment appFrom: 'C:\Me2\Apps-stateless\newspeak-current\Task2App.nof'. 
+    app1:: p blackMarket Deployment appFrom: 'Task2App.nof'. 
     app1:: p permissionsService transform: app1. 
     (p permissionsService isFactory: app1 AppExt) ifFalse: [halt.].
 

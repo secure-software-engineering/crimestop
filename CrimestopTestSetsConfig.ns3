@@ -1,7 +1,7 @@
 Newspeak3
 'AA-Crimestop'
 class CrimestopTestSetsConfig packageTestsUsing: ns = (|
-App2Location = 'C:\Me2\Apps-stateless\newspeak-current\Task2App.nof'.
+App2Location = 'Task2App.nof'.
 
 crimestopBase = ns CrimestopBase packageUsing: ns. 
 crimestopScenarios = ns CrimestopScenarios packageUsing: ns forBase: crimestopBase.

@@ -65,7 +65,7 @@ crimestop run: ChineseWallTestApp.
 assert: true.
 )
 testDeserialization = ( |task1|
-task1:: crimestop tamedPlatform MockupNetworking init fileTransfer:  'C:\Me2\Apps-stateless\newspeak-current\Task1App.nof'.
+task1:: crimestop tamedPlatform MockupNetworking init fileTransfer:  'Task1App.nof'.
 task1 main: crimestop tamedPlatform args: nil. 
 assert: true.
 )
