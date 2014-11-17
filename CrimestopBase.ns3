@@ -346,7 +346,7 @@ dependencyList:: messageContext dependencyList.
 clasz:: messageContext clasz.
 
 (convenience _class: clasz containsMixin: module mixin butLacksRefinement: refinement) 
-      ifTrue: [clasz:: refinement mixin apply: clasz].
+      ifTrue: [clasz:: refinement mixinApply: clasz].
 
 messageContext clasz: clasz.
 )) : ()

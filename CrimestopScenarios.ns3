@@ -32,7 +32,7 @@ NewspeakMirrorsWorkaround = newspeakMirrorsWorkaround.
 Mirrors = newspeakMirrorsWorkaround.
 |)
 (
-class ContactList =  outer CrimestopScenarios Authorizer (
+class ContactList = outer CrimestopScenarios Authorizer (
 (*A ContactList that someone can use and retrieve, Vanilla implementation*)| 
 IO
 |)
@@ -1147,7 +1147,7 @@ clasz:: messageContext clasz.
 
 ((convenience _class: clasz containsMixin: module mixin butLacksRefinement: refinement)  
 and: (messageContext sender class = application))
-      ifTrue: [clasz:: refinement mixin apply: clasz].
+      ifTrue: [clasz:: refinement mixinApply: clasz].
 
 messageContext clasz: clasz.
 )) : ()) : ()'as yet unclassified'
@@ -1469,7 +1469,7 @@ main: p args: args = (|networking app arguments|
     ^app run.
 
 )) : ()
-class CheckEndowed init: args =  outer CrimestopScenarios Authorizer (| dependency
+class CheckEndowed init: args = outer CrimestopScenarios Authorizer (| dependency
 |init: args)
 ('as yet unclassified'
 init: args = (
